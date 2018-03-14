@@ -2,5 +2,13 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorAccent">#51b53f</color>
+    <color name="colorPink">#FF4081</color>
+    <color name="colorRed">#b53f51</color>
+    <color name="colorLightBlue">#3f8cb5</color>
+    <color name="colorComplementary">#b5a33f</color>
+    <color name="colorYellow">#fff200</color>
+    <color name="colorGrey">#a5a8a9</color>
+    <color name="colorTransparent">#00ffffff</color>
+    <color name="colorWhite">#ffffffff</color>
 </resources>

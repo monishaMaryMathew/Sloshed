@@ -14,15 +14,25 @@ import android.view.MenuItem;
 import com.monisha.samples.sloshed.R;
 import com.monisha.samples.sloshed.fragments.CheckRateFragment;
 import com.monisha.samples.sloshed.fragments.DashboardFragment;
+import com.monisha.samples.sloshed.fragments.MealFragment;
+import com.monisha.samples.sloshed.fragments.MeterFragment;
 import com.monisha.samples.sloshed.fragments.SettingsFragment;
+import com.monisha.samples.sloshed.fragments.StartNightFragment;
+import com.monisha.samples.sloshed.util.StageEnum;
 
 public class MainActivity extends AppCompatActivity implements
         CheckRateFragment.OnFragmentInteractionListener,
         DashboardFragment.OnFragmentInteractionListener,
-        SettingsFragment.OnFragmentInteractionListener
+        SettingsFragment.OnFragmentInteractionListener,
+        StartNightFragment.OnFragmentInteractionListener,
+        MealFragment.OnFragmentInteractionListener,
+        MeterFragment.OnFragmentInteractionListener
 {
-    FragmentManager fragmentManager = getFragmentManager();
-    FragmentTransaction fragmentTransaction;
+    private FragmentManager fragmentManager = getFragmentManager();
+    private FragmentTransaction fragmentTransaction;
+    private StageEnum checkRateStage = StageEnum.START_MY_NIGHT;
+
+    private int minAfterLastMeal = 0;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -36,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements
                     fragment = new DashboardFragment();
                     break;
                 case R.id.navigation_check_rate:
-                    fragment = new CheckRateFragment();
+                    fragment = new CheckRateFragment().newInstance(checkRateStage);
                     break;
                 case R.id.navigation_settings:
                     fragment = new SettingsFragment();
@@ -75,7 +85,52 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onCheckRateFragmentInteraction(Uri uri) {
+    public int onCheckRateFragmentInteractionGetMin() {
+        return minAfterLastMeal;
+    }
+
+    public void setCheckRateStage(StageEnum stage){
+        checkRateStage = stage;
+    }
+
+    public StageEnum getCheckRateStage(){
+        return checkRateStage;
+    }
+
+    @Override
+    public void onStartNightFragmentInteraction() {
+        setCheckRateStage(StageEnum.START_MY_NIGHT.getNext());
+        setFragment();
+    }
+
+    @Override
+    public void onMealFragmentInteractionBackBtnPressed() {
+        setCheckRateStage(StageEnum.MEAL_DETAILS.getPrevious());
+        setFragment();
+    }
+
+    @Override
+    public void onMealFragmentInteractionNextBtnPressed(int minAfterLastMeal) {
+        this.minAfterLastMeal = minAfterLastMeal;
+        setCheckRateStage(StageEnum.METER_WITH_DRINK);
+        setFragment();
+    }
+
+    private void setFragment(){
+        fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, new CheckRateFragment().newInstance(getCheckRateStage()));
+        fragmentTransaction.commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        //TODO
+        //Add exit app function
+    }
+
+    @Override
+    public void onMeterFragmentInteraction() {
 
     }
 }

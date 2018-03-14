@@ -1,5 +1,7 @@
 package com.monisha.samples.sloshed.fragments;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.util.StageEnum;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,12 +24,13 @@ import com.monisha.samples.sloshed.R;
 public class CheckRateFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_STAGE = "param1";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private int stageParam;
+    private StageEnum currStage;
+    private FragmentTransaction subFragmentTransaction;
+    private FragmentManager subFragmentManager;
 
     private OnFragmentInteractionListener mListener;
 
@@ -38,16 +42,14 @@ public class CheckRateFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param stageEnum Parameter 1.
      * @return A new instance of fragment CheckRateFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CheckRateFragment newInstance(String param1, String param2) {
+    public static CheckRateFragment newInstance(StageEnum stageEnum) {
         CheckRateFragment fragment = new CheckRateFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putInt(ARG_STAGE, stageEnum.toInt());
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,8 +58,7 @@ public class CheckRateFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            stageParam = getArguments().getInt(ARG_STAGE);
         }
     }
 
@@ -65,14 +66,12 @@ public class CheckRateFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_check_rate, container, false);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onCheckRateFragmentInteraction(uri);
-        }
+        View view = inflater.inflate(R.layout.fragment_check_rate, container, false);
+        subFragmentManager = getChildFragmentManager();
+        subFragmentTransaction = subFragmentManager.beginTransaction();
+        subFragmentTransaction.replace(R.id.subfragment_container, getCurrFragment(getCurrStage(stageParam)));
+        subFragmentTransaction.commit();
+        return view;
     }
 
     @Override
@@ -80,6 +79,7 @@ public class CheckRateFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
+            mListener.onCheckRateFragmentInteractionGetMin();
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
@@ -104,6 +104,34 @@ public class CheckRateFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onCheckRateFragmentInteraction(Uri uri);
+        int onCheckRateFragmentInteractionGetMin();
+    }
+
+    private StageEnum getCurrStage(int stageInt){
+        switch (stageInt) {
+            case 0:
+                return StageEnum.START_MY_NIGHT;
+            case 1:
+                return StageEnum.MEAL_DETAILS;
+            case 2:
+                return StageEnum.METER_WITH_DRINK;
+            case 3:
+                return StageEnum.METER;
+        }
+        return StageEnum.START_MY_NIGHT;
+    }
+
+    private Fragment getCurrFragment(StageEnum stageEnum) {
+        switch (stageEnum) {
+            case START_MY_NIGHT:
+                return new StartNightFragment();
+            case MEAL_DETAILS:
+                return new MealFragment();
+            case METER_WITH_DRINK:
+                return new MeterFragment().newInstance(true, mListener.onCheckRateFragmentInteractionGetMin());
+            case METER:
+                return new MeterFragment().newInstance(false, mListener.onCheckRateFragmentInteractionGetMin());
+        }
+        return new StartNightFragment();
     }
 }

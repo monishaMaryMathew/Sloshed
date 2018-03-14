@@ -12,6 +12,9 @@ import android.widget.ListView;
 import com.monisha.samples.sloshed.R;
 import com.monisha.samples.sloshed.adapters.TipsListAdapter;
 import com.monisha.samples.sloshed.models.Tips;
+//TODO
+//import com.monisha.samples.sloshed.adapters.TipsListAdapter;
+//import com.monisha.samples.sloshed.models.Tips;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -22,7 +25,6 @@ import com.monisha.samples.sloshed.models.Tips;
  * create an instance of this fragment.
  */
 public class DashboardFragment extends Fragment {
-
     Tips[] tipsArray = {new Tips("abc","abcd"), new Tips("def", "def")};
     ListView listView;
     // TODO: Rename parameter arguments, choose names that match
