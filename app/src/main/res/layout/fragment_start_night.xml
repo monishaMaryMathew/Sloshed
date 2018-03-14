@@ -1,0 +1,38 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.monisha.samples.sloshed.fragments.StartNightFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="50dp"
+        android:layout_gravity="center"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/ic_local_bar_black_24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lines="3"
+            android:maxLines="3"
+            android:gravity="center"
+            android:layout_marginBottom="30dp"
+            android:text="Are you ready for an exciting evening? We'll just help you make it a responsible and safe one too..." />
+
+        <Button
+            android:id="@+id/start_night_btn"
+            android:layout_width="250dp"
+            android:layout_height="65dp"
+            android:text="Start Your Night"
+            android:backgroundTint="@color/colorAccent" />
+    </LinearLayout>
+</FrameLayout>
