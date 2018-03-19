@@ -12,6 +12,7 @@ import android.view.MenuItem;
 
 
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.fragments.CabBookingFragment;
 import com.monisha.samples.sloshed.fragments.CheckRateFragment;
 import com.monisha.samples.sloshed.fragments.DashboardFragment;
 import com.monisha.samples.sloshed.fragments.MealFragment;
@@ -26,7 +27,9 @@ public class MainActivity extends AppCompatActivity implements
         SettingsFragment.OnFragmentInteractionListener,
         StartNightFragment.OnFragmentInteractionListener,
         MealFragment.OnFragmentInteractionListener,
-        MeterFragment.OnFragmentInteractionListener
+        MeterFragment.OnFragmentInteractionListener,
+        CabBookingFragment.OnFragmentInteractionListener
+
 {
     private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction;
@@ -122,6 +125,13 @@ public class MainActivity extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
+    private void setCabFragment(){
+        fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, new CabBookingFragment());
+        fragmentTransaction.commit();
+    }
+
+
     @Override
     public void onBackPressed() {
         //super.onBackPressed();
@@ -131,6 +141,11 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onMeterFragmentInteraction() {
+        setCabFragment();
+    }
+
+    @Override
+    public void onCabBookingFragmentInteraction() {
 
     }
 }
