@@ -37,7 +37,6 @@ import com.lyft.networking.apiObjects.RideType;
 import com.lyft.networking.apiObjects.RideTypesResponse;
 import com.lyft.networking.apis.LyftPublicApi;
 import com.monisha.samples.sloshed.R;
-import com.monisha.samples.sloshed.util.CurrentLocation;
 import com.uber.sdk.android.core.UberSdk;
 import com.uber.sdk.android.rides.RideParameters;
 import com.uber.sdk.android.rides.RideRequestButton;
