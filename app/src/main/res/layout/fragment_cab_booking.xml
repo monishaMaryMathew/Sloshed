@@ -11,38 +11,63 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
+
     <TextView
         android:id="@+id/mytextview"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Book a Ride"
+        android:text="Get home in a cab"
+        android:textStyle="bold"
         android:layout_gravity="center"
-        android:textColor="#4162f4"
+        android:textColor="@color/black"
         android:textSize="24dp"
         />
 
     <com.uber.sdk.android.rides.RideRequestButton
         android:layout_width="350dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
         uber:ub__style="black"
         android:layout_gravity="center"/>
-    <TextView
-        android:id="@+id/mytextview1"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        />
-    <TextView
-        android:id="@+id/mytextview2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        />
-    <com.lyft.lyftbutton.LyftButton
-        android:id="@+id/lyft_button"
-        android:layout_width="350dp"
-        android:layout_height="wrap_content"
-        lyft:lyftStyle="lyftHotPink"
-        android:layout_gravity="center"/>
-        />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            >
+
+            <com.lyft.lyftbutton.LyftButton
+                android:id="@+id/lyft_button"
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                lyft:lyftStyle="lyftMulberryDark"
+                />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@color/hot_pink"
+                android:orientation="horizontal"
+                android:padding="10dp"
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ride types"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    />
+
+                <Spinner
+                    android:id="@+id/ride_type_dropdown"
+                    android:layout_width="50dp"
+                    android:layout_height="20dp"
+                    />
+            </LinearLayout>
+        </LinearLayout>
+
     </LinearLayout>
 </FrameLayout>
