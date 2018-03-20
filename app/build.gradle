@@ -36,4 +36,5 @@ dependencies {
     implementation 'com.uber.sdk:rides-android:0.5.3'
     implementation 'com.github.anastr:speedviewlib:1.1.7'
     implementation 'com.lyft:lyft-android-sdk:1.0.3'
+    implementation 'com.google.android.gms:play-services:8.1.0'
 }
