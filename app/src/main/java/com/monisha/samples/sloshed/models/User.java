@@ -1,6 +1,6 @@
 package com.monisha.samples.sloshed.models;
 
-import com.monisha.samples.sloshed.util.Gender;
+import com.monisha.samples.sloshed.util.GenderEnum;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,23 +13,27 @@ public class User {
     //Profiling details as per the settings screen
     public int weight;
     public int age;
-    public Gender gender;
+    public GenderEnum genderEnum;
     //Emergency Contact Info
     //check if at least one emergency contact information is available
     public List<EmergencyContact> emergencyContacts = new ArrayList<EmergencyContact>();
 
     //TODO Compute the following
-    public int lowLevel;
-    public int mediumLevel;
+    public int lowLevel = 10;
+    public int mediumLevel = 50;
 
     //TODO keep updating the following information
     public List<Drink> drinksConsumed = new ArrayList<Drink>();
     public float currentPercentage;
 
-    public User(int weight, int age, Gender gender, List<EmergencyContact> emergencyContacts) {
+    public User() {
+
+    }
+
+    public User(int weight, int age, GenderEnum genderEnum, List<EmergencyContact> emergencyContacts) {
         this.weight = weight;
         this.age = age;
-        this.gender = gender;
+        this.genderEnum = genderEnum;
         this.emergencyContacts = emergencyContacts;
     }
 

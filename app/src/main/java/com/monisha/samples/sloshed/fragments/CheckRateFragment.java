@@ -1,11 +1,10 @@
 package com.monisha.samples.sloshed.fragments;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,7 +127,7 @@ public class CheckRateFragment extends Fragment {
             case MEAL_DETAILS:
                 return new MealFragment();
             case METER_WITH_DRINK:
-                return new MeterFragment().newInstance(true, mListener.onCheckRateFragmentInteractionGetMin());
+                return new DrinkSelectionFragment();
             case METER:
                 return new MeterFragment().newInstance(false, mListener.onCheckRateFragmentInteractionGetMin());
         }
