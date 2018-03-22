@@ -1,9 +1,15 @@
 package com.monisha.samples.sloshed.fragments;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,11 +17,19 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.anastr.speedviewlib.SpeedView;
+import com.google.android.gms.location.places.GeoDataClient;
+import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBufferResponse;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.monisha.samples.sloshed.R;
 import com.monisha.samples.sloshed.activities.MainActivity;
 
@@ -45,6 +59,9 @@ public class MeterFragment extends Fragment {
     private LinearLayout drunkModeLayout;
     private Button endMyNightBtn;
     private LinearLayout addNewDrinkBtn, addPrevDrinkBtn;
+    private RelativeLayout sosLayout;
+    private PlaceDetectionClient mPlaceDetectionClient;
+    protected GeoDataClient mGeoDataClient;
 
     private Switch initiateDrunkModeSwitch;
 
@@ -79,6 +96,10 @@ public class MeterFragment extends Fragment {
             showDialog = getArguments().getBoolean(ARG_DIALOGUE);
             minAfterLastMeal = getArguments().getInt(ARG_MIN);
         }
+        mGeoDataClient = Places.getGeoDataClient(this.getActivity());
+        // Construct a PlaceDetectionClient.
+        mPlaceDetectionClient = Places.getPlaceDetectionClient(this.getActivity());
+
     }
 
     @Override
@@ -94,7 +115,41 @@ public class MeterFragment extends Fragment {
         percentageTV = (TextView) view.findViewById(R.id.percentage_info);
         messageTV = (TextView) view.findViewById(R.id.message_info);
         drunkModeLayout = (LinearLayout) view.findViewById(R.id.drunk_mode_layout);
+        sosLayout = (RelativeLayout)view.findViewById(R.id.sos_layout);
         endMyNightBtn = (Button) view.findViewById(R.id.end_my_night_btn);
+        if (ContextCompat.checkSelfPermission(this.getActivity(),
+                Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this.getActivity(),
+                    Manifest.permission.SEND_SMS)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this.getActivity(),
+                        new String[]{Manifest.permission.SEND_SMS},
+                        100);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        } else {
+            sosLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getPlaces();
+
+                }
+            });
+        }
         endMyNightBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -220,5 +275,60 @@ public class MeterFragment extends Fragment {
         void onMeterFragmentInteraction();
 
         void getDrinksListing();
+    }
+
+    private void getPlaces() {
+        if (ContextCompat.checkSelfPermission(this.getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this.getActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+            } else {
+
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this.getActivity(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        100);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }else {
+
+            Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
+            placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
+                @SuppressLint("RestrictedApi")
+                @Override
+                public void onComplete(@NonNull Task<PlaceLikelihoodBufferResponse> task) {
+                    PlaceLikelihoodBufferResponse likelyPlaces = task.getResult();
+                    StringBuffer myLoc = new StringBuffer();
+                    for (PlaceLikelihood placeLikelihood : likelyPlaces) {
+                        Log.i("lo", String.format("Place '%s' has likelihood: %g",
+                                placeLikelihood.getPlace().getName(),
+                                placeLikelihood.getLikelihood()));
+                        if(placeLikelihood.getLikelihood()>0.05) {
+                            myLoc.append("Location Name: ").append(placeLikelihood.getPlace().getName().toString()+" ").append(", Location Address: ").append(placeLikelihood.getPlace().getAddress().toString()).append(" ");
+                        }
+
+                    }
+                    likelyPlaces.release();
+                    sendSMS("7038395635", "I need HELP!.I am currently around these locations:"+ myLoc.toString());
+                }
+            });
+        }
+    }
+
+    private void sendSMS(String phoneNumber, String message) {
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, message, null, null);
     }
 }
