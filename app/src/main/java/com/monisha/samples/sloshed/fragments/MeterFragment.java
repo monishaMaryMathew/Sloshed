@@ -2,17 +2,22 @@ package com.monisha.samples.sloshed.fragments;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.anastr.speedviewlib.SpeedView;
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.activities.MainActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,14 +39,17 @@ public class MeterFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private int LEVEL_1 = 10;
-    private int LEVEL_2 = 50;
-    private int LEVEL_3 = 80;
-
     private TextView percentageTV, messageTV;
     private SpeedView meter;
 
     private LinearLayout drunkModeLayout;
+    private Button endMyNightBtn;
+    private LinearLayout addNewDrinkBtn, addPrevDrinkBtn;
+
+    private Switch initiateDrunkModeSwitch;
+
+    private float drinkCount = 0;
+    
 
     public MeterFragment() {
         // Required empty public constructor
@@ -81,22 +89,71 @@ public class MeterFragment extends Fragment {
 
         meter = (SpeedView) view.findViewById(R.id.meter);
         meter.setSpeedTextColor(ContextCompat.getColor(getContext(), R.color.colorTransparent));
-        setLevels(5, 15); //TODO compute as per the user profile
+        setLevels(); //TODO compute as per the user profile
 
         percentageTV = (TextView) view.findViewById(R.id.percentage_info);
         messageTV = (TextView) view.findViewById(R.id.message_info);
         drunkModeLayout = (LinearLayout) view.findViewById(R.id.drunk_mode_layout);
+        endMyNightBtn = (Button) view.findViewById(R.id.end_my_night_btn);
+        endMyNightBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onButtonPressed();
+            }
+        });
+
+        addNewDrinkBtn = (LinearLayout) view.findViewById(R.id.add_new_drink_btn);
+        addPrevDrinkBtn = (LinearLayout) view.findViewById(R.id.repeat_drink_btn);
+
+        if (((MainActivity) getActivity()).previousDrink != null && ((MainActivity) getActivity()).previousDrink.getQuantity() != 0 && ((MainActivity) getActivity()).previousDrink.getAlcoholPercentage() != 0) {
+            addPrevDrinkBtn.setVisibility(View.VISIBLE);
+        } else {
+            addPrevDrinkBtn.setVisibility(View.GONE);
+        }
+
+        addPrevDrinkBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO add code to update meter
+                ((MainActivity) getActivity()).user.addDrink(((MainActivity) getActivity()).previousDrink);
+                setMeter();//update meter
+                Toast.makeText(getActivity(), "Drink has been added!", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        addNewDrinkBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mListener != null) {
+                    mListener.getDrinksListing();
+                }
+            }
+        });
+
+        initiateDrunkModeSwitch = (Switch) view.findViewById(R.id.drunk_mode_switch);
+        initiateDrunkModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                initiateDrunkMode(b);
+            }
+        });
+
         initiateDrunkMode(false);
 
-        setMeter(6); //TODO compute as per the drink intake
+        setMeter(); //TODO compute as per the drink intake
         return view;
     }
 
-    private void setLevels(int low, int medium) {
-        LEVEL_1 = low;
-        LEVEL_2 = medium;
+    private void setLevels() {
+        int low = ((MainActivity) getActivity()).user.getLowLevel();
+        Log.d("Tag", "Low:" + low);
         meter.setLowSpeedPercent(low);
-        meter.setMediumSpeedPercent(medium);
+        int med = ((MainActivity) getActivity()).user.getMediumLevel();
+        Log.d("Tag", "medium:" + med);
+        if (med >= 100) {
+            med = 90;
+        }
+        meter.setMediumSpeedPercent(med);
     }
 
     private void initiateDrunkMode(boolean initiate) {
@@ -107,23 +164,25 @@ public class MeterFragment extends Fragment {
         }
     }
 
-    private void setMeter(int percentage) {
+    private void setMeter() {
+        int drinkCount = (((MainActivity) getActivity()).user.getDrinkPercentage());
         String message = "";
-        if (percentage < LEVEL_1) {
+        if (drinkCount < ((MainActivity) getActivity()).user.getLowLevel()) {
             message = "Happy drinking!";
-        } else if (percentage < LEVEL_2) {
+        } else if (drinkCount < ((MainActivity) getActivity()).user.getMediumLevel()) {
             message = "You might want to slow down now";
         } else {
             message = "Warning! Auto-initiating drunk mode.";
             initiateDrunkMode(true);
+            initiateDrunkModeSwitch.setEnabled(false);
         }
-        meter.setSpeedAt(percentage);
+        meter.setSpeedAt(drinkCount);
         messageTV.setText(message);
-        percentageTV.setText(percentage + "%");
+        percentageTV.setText(((int) ((MainActivity) getActivity()).user.getDrinkCount()) + "");
     }
 
     // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed() {
         if (mListener != null) {
             mListener.onMeterFragmentInteraction();
         }
@@ -159,5 +218,7 @@ public class MeterFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onMeterFragmentInteraction();
+
+        void getDrinksListing();
     }
 }

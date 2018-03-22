@@ -9,16 +9,19 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-
+import android.widget.Toast;
 
 import com.monisha.samples.sloshed.R;
 import com.monisha.samples.sloshed.fragments.CabBookingFragment;
 import com.monisha.samples.sloshed.fragments.CheckRateFragment;
 import com.monisha.samples.sloshed.fragments.DashboardFragment;
+import com.monisha.samples.sloshed.fragments.DrinkSelectionFragment;
 import com.monisha.samples.sloshed.fragments.MealFragment;
 import com.monisha.samples.sloshed.fragments.MeterFragment;
 import com.monisha.samples.sloshed.fragments.SettingsFragment;
 import com.monisha.samples.sloshed.fragments.StartNightFragment;
+import com.monisha.samples.sloshed.models.Drink;
+import com.monisha.samples.sloshed.models.User;
 import com.monisha.samples.sloshed.util.StageEnum;
 
 public class MainActivity extends AppCompatActivity implements
@@ -28,12 +31,16 @@ public class MainActivity extends AppCompatActivity implements
         StartNightFragment.OnFragmentInteractionListener,
         MealFragment.OnFragmentInteractionListener,
         MeterFragment.OnFragmentInteractionListener,
-        CabBookingFragment.OnFragmentInteractionListener
+        CabBookingFragment.OnFragmentInteractionListener,
+        DrinkSelectionFragment.OnFragmentInteractionListener
 
 {
     private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction;
     private StageEnum checkRateStage = StageEnum.START_MY_NIGHT;
+
+    public Drink previousDrink = null;
+    public User user = new User();
 
     private int minAfterLastMeal = 0;
 
@@ -103,23 +110,23 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onStartNightFragmentInteraction() {
         setCheckRateStage(StageEnum.START_MY_NIGHT.getNext());
-        setFragment();
+        setCheckRateFragment();
     }
 
     @Override
     public void onMealFragmentInteractionBackBtnPressed() {
         setCheckRateStage(StageEnum.MEAL_DETAILS.getPrevious());
-        setFragment();
+        setCheckRateFragment();
     }
 
     @Override
     public void onMealFragmentInteractionNextBtnPressed(int minAfterLastMeal) {
         this.minAfterLastMeal = minAfterLastMeal;
         setCheckRateStage(StageEnum.METER_WITH_DRINK);
-        setFragment();
+        setCheckRateFragment();
     }
 
-    private void setFragment(){
+    private void setCheckRateFragment() {
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, new CheckRateFragment().newInstance(getCheckRateStage()));
         fragmentTransaction.commit();
@@ -145,7 +152,43 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void getDrinksListing() {
+        fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fragment_container, new DrinkSelectionFragment());
+        fragmentTransaction.commit();
+    }
+
+    @Override
     public void onCabBookingFragmentInteraction() {
 
+    }
+
+    @Override
+    public void onDrinkFragmentInteraction(int buttonCase, Drink drink) {
+        switch (buttonCase) {
+            case 0:
+                //Back/Cancel button
+                setCheckRateStage(StageEnum.METER);
+                setCheckRateFragment();
+                break;
+            case 1:
+                //Add button
+                //check if there is a valid selection
+                if (drink != null && drink.getAlcoholPercentage() != 0 && drink.getQuantity() != 0) {
+                    drink.getDrinkCount();//defult check
+                    previousDrink = drink;
+                    user.addDrink(previousDrink);//if it is a correct selection
+                    setCheckRateStage(StageEnum.METER);
+                    setCheckRateFragment();
+                } else {
+                    //else if it is incomplete, show correct message
+                    //Show toast
+                    Toast.makeText(this, "Please select an appropriate percentage and quantity for your drink to proceed.", Toast.LENGTH_SHORT).show();
+                    //Remain on the same screen
+                }
+
+
+                break;
+        }
     }
 }
