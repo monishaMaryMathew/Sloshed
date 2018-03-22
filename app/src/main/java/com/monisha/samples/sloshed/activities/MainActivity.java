@@ -175,10 +175,11 @@ public class MainActivity extends AppCompatActivity implements
                 //Add button
                 //check if there is a valid selection
                 if (drink != null && drink.getAlcoholPercentage() != 0 && drink.getQuantity() != 0) {
-                    //if it is a correct selection
+                    drink.getDrinkCount();//defult check
+                    previousDrink = drink;
+                    user.addDrink(previousDrink);//if it is a correct selection
                     setCheckRateStage(StageEnum.METER);
                     setCheckRateFragment();
-                    previousDrink = drink;
                 } else {
                     //else if it is incomplete, show correct message
                     //Show toast

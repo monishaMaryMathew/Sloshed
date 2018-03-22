@@ -79,7 +79,7 @@ public class Drink {
         else if (alcoholPercentage <= 12) {
             if (quantity <= 5) {
                 drinkCount = 1;
-            } else if (quantity <= 25.36) { //one whole bottle, 750 ml
+            } else if (quantity <= (float) 25.36) { //one whole bottle, 750 ml
                 drinkCount = 5;
             }
         }

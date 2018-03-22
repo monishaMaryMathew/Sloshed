@@ -4,11 +4,14 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +45,10 @@ public class MeterFragment extends Fragment {
     private LinearLayout drunkModeLayout;
     private Button endMyNightBtn;
     private LinearLayout addNewDrinkBtn, addPrevDrinkBtn;
+
+    private Switch initiateDrunkModeSwitch;
+
+    private float drinkCount = 0;
     
 
     public MeterFragment() {
@@ -108,6 +115,8 @@ public class MeterFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //TODO add code to update meter
+                ((MainActivity) getActivity()).user.addDrink(((MainActivity) getActivity()).previousDrink);
+                setMeter();//update meter
                 Toast.makeText(getActivity(), "Drink has been added!", Toast.LENGTH_LONG).show();
             }
         });
@@ -121,15 +130,30 @@ public class MeterFragment extends Fragment {
             }
         });
 
+        initiateDrunkModeSwitch = (Switch) view.findViewById(R.id.drunk_mode_switch);
+        initiateDrunkModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                initiateDrunkMode(b);
+            }
+        });
+
         initiateDrunkMode(false);
 
-        setMeter(6); //TODO compute as per the drink intake
+        setMeter(); //TODO compute as per the drink intake
         return view;
     }
 
     private void setLevels() {
-        meter.setLowSpeedPercent(((MainActivity) getActivity()).user.lowLevel);
-        meter.setMediumSpeedPercent(((MainActivity) getActivity()).user.mediumLevel);
+        int low = ((MainActivity) getActivity()).user.getLowLevel();
+        Log.d("Tag", "Low:" + low);
+        meter.setLowSpeedPercent(low);
+        int med = ((MainActivity) getActivity()).user.getMediumLevel();
+        Log.d("Tag", "medium:" + med);
+        if (med >= 100) {
+            med = 90;
+        }
+        meter.setMediumSpeedPercent(med);
     }
 
     private void initiateDrunkMode(boolean initiate) {
@@ -140,19 +164,21 @@ public class MeterFragment extends Fragment {
         }
     }
 
-    private void setMeter(int percentage) {
+    private void setMeter() {
+        int drinkCount = (((MainActivity) getActivity()).user.getDrinkPercentage());
         String message = "";
-        if (percentage < ((MainActivity) getActivity()).user.lowLevel) {
+        if (drinkCount < ((MainActivity) getActivity()).user.getLowLevel()) {
             message = "Happy drinking!";
-        } else if (percentage < ((MainActivity) getActivity()).user.mediumLevel) {
+        } else if (drinkCount < ((MainActivity) getActivity()).user.getMediumLevel()) {
             message = "You might want to slow down now";
         } else {
             message = "Warning! Auto-initiating drunk mode.";
             initiateDrunkMode(true);
+            initiateDrunkModeSwitch.setEnabled(false);
         }
-        meter.setSpeedAt(percentage);
+        meter.setSpeedAt(drinkCount);
         messageTV.setText(message);
-        percentageTV.setText(percentage + "%");
+        percentageTV.setText(((int) ((MainActivity) getActivity()).user.getDrinkCount()) + "");
     }
 
     // TODO: Rename method, update argument and hook method into UI event
