@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import com.monisha.samples.sloshed.R;
  */
 
 public class CustomSeekBarPreference extends Preference {
+    private static InputMethodManager imm = null;
     public int value = 0;
     private SeekBar seekBar;
     private EditText seekbarValue;
@@ -89,13 +91,24 @@ public class CustomSeekBarPreference extends Preference {
 
             }
         });
+        imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         seekbarValue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                imm.hideSoftInputFromWindow(
+                        seekbarValue.getWindowToken(), 0);
                 createDialog();
             }
         });
-
+        imm.hideSoftInputFromWindow(
+                seekbarValue.getWindowToken(), 0);
+        seekbarValue.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                imm.hideSoftInputFromWindow(
+                        seekbarValue.getWindowToken(), 0);
+            }
+        });
         return view;
     }
 
