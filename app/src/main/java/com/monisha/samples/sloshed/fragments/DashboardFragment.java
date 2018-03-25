@@ -1,17 +1,42 @@
 package com.monisha.samples.sloshed.fragments;
 
+import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.activities.MainActivity;
 import com.monisha.samples.sloshed.adapters.TipsListAdapter;
 import com.monisha.samples.sloshed.models.Tips;
+import com.monisha.samples.sloshed.util.APICallsUtil;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 //TODO
 //import com.monisha.samples.sloshed.adapters.TipsListAdapter;
 //import com.monisha.samples.sloshed.models.Tips;
@@ -25,7 +50,7 @@ import com.monisha.samples.sloshed.models.Tips;
  * create an instance of this fragment.
  */
 public class DashboardFragment extends Fragment {
-    Tips[] tipsArray = {new Tips("abc","abcd"), new Tips("def", "def")};
+
     ListView listView;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -37,8 +62,9 @@ public class DashboardFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-
-    public DashboardFragment() {
+    private static int PERMISSION_REQUEST_INTERNET = 0;
+    public DashboardFragment()
+    {
         // Required empty public constructor
     }
 
@@ -61,9 +87,9 @@ public class DashboardFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
-
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -71,54 +97,142 @@ public class DashboardFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState)
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         // Inflate the layout for this fragment
         //setContentView(R.layout.activity_main);
         View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
-        TipsListAdapter listAdapter = new TipsListAdapter(getActivity(), tipsArray);
+        GetTask runner = new GetTask();
+        runner.execute();
         listView = (ListView) view.findViewById(R.id.tipsList);
-        listView.setAdapter(listAdapter);
         return view;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
+    public void onButtonPressed(Uri uri)
+    {
         if (mListener != null) {
             mListener.onDashboardFragmentInteraction(uri);
         }
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(Context context)
+    {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
+        if (context instanceof OnFragmentInteractionListener)
+        {
             mListener = (OnFragmentInteractionListener) context;
-        } else {
+        }
+        else
+        {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
     }
 
     @Override
-    public void onDetach() {
+    public void onDetach()
+    {
         super.onDetach();
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
+    public class GetTask extends AsyncTask<String, Void, String>
+    {
+        private Exception exception;
+        private static final int REQUEST_INTERNET = 0;
+        private  List<Tips> tipsArray = new ArrayList<Tips>();
+        protected String doInBackground(String... urls)
+        {
+            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.INTERNET)
+                    == PackageManager.PERMISSION_GRANTED)
+            {
+                // Permission is already available
+                try
+                {
+                    String resp = APICallsUtil.getResponse("http://notsloshed-env.us-east-1.elasticbeanstalk.com/tips");
+                        JSONObject jObject = new JSONObject(resp);
+                        JSONArray jArray = jObject.getJSONObject("_embedded").getJSONArray("tips");
+                        for (int i = 0; i < jArray.length(); i++)
+                        {
+                            JSONObject oneObject = jArray.getJSONObject(i);
+                            // Pulling items from the array
+                            String oneObjectsItem = oneObject.getString("tipname");
+                            String oneObjectsItem2 = oneObject.getString("tiplink");
+                            tipsArray.add(new Tips(oneObjectsItem, oneObjectsItem2));
+                        }
+                        // Do normal input or output stream reading
+//                        populateList(tipsArray);
+
+                }
+                catch (Exception e)
+                {
+                    String ex = e.getMessage();
+                }
+            }
+            else
+            {
+                // Permission is missing and must be requested.
+                requestPermission();
+            }
+            return null;
+        }
+
+        private void requestPermission()
+        {
+            // Permission has not been granted and must be requested.
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.INTERNET))
+            {
+                // Request the permission
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.INTERNET}, PERMISSION_REQUEST_INTERNET);
+            }
+            else
+            {
+                // Request the permission. The result will be received in onRequestPermissionResult().
+                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.INTERNET}, PERMISSION_REQUEST_INTERNET);
+            }
+        }
+
+        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+        {
+            // BEGIN_INCLUDE(onRequestPermissionsResult)
+            if (requestCode == REQUEST_INTERNET)
+            {
+                // Request for camera permission.
+                if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    // Permission has been granted. Start camera preview Activity.
+                    String resp = APICallsUtil.getResponse("http://notsloshed-env.us-east-1.elasticbeanstalk.com/tips");
+                }
+                else
+                {
+                    // Permission request was denied.
+
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String s)
+        {
+            super.onPostExecute(s);
+            populateList(tipsArray);
+        }
+    }
+
+
+
+    private void populateList(List<Tips> tipsList)
+    {
+        Tips[] tipsArray = tipsList.toArray(new Tips[tipsList.size()]);
+        TipsListAdapter listAdapter = new TipsListAdapter(getActivity(), tipsList.toArray(new Tips[tipsList.size()]));
+        listView.setAdapter(listAdapter);
+    }
+
+    public interface OnFragmentInteractionListener
+    {
         // TODO: Update argument type and name
         void onDashboardFragmentInteraction(Uri uri);
     }
 }
+
