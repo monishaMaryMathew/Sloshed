@@ -18,6 +18,7 @@ public class User {
     //Emergency Contact Info
     //check if at least one emergency contact information is available
     private List<EmergencyContact> emergencyContacts = new ArrayList<EmergencyContact>();
+    private List<BlockedContact> blockedContacts = new ArrayList<BlockedContact>();
 
     //TODO Compute the following
     private int lowLevel;
@@ -34,11 +35,12 @@ public class User {
 
     }
 
-    public User(int weight, int age, GenderEnum genderEnum, List<EmergencyContact> emergencyContacts) {
+    public User(int weight, int age, GenderEnum genderEnum, List<EmergencyContact> emergencyContacts, List<BlockedContact> blockedContacts) {
         this.weight = weight;
         this.age = age;
         this.genderEnum = genderEnum;
         this.emergencyContacts = emergencyContacts;
+        this.blockedContacts = blockedContacts;
     }
 
     public int getLowLevel() {
