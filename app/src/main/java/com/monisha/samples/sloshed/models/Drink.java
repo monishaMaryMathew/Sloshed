@@ -2,6 +2,8 @@ package com.monisha.samples.sloshed.models;
 
 import com.monisha.samples.sloshed.util.DrinkEnum;
 
+import java.util.Calendar;
+
 /**
  * Created by Monisha on 3/10/2018.
  * Reference for standard drink size:
@@ -14,6 +16,15 @@ public class Drink {
     private float alcoholPercentage = 0;
     private float quantity = 0;
     private float drinkCount = 0;
+    private long timestamp = Calendar.getInstance().getTimeInMillis();
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
     public DrinkEnum getDrinkType() {
         return drinkType;
@@ -39,15 +50,15 @@ public class Drink {
         this.quantity = quantity;
     }
 
-    public void setDrinkCount(float drinkCount) {
-        this.drinkCount = drinkCount;
-    }
-
     public float getDrinkCount() {
         if (drinkCount == 0) {
             computeDrinkCount();
         }
         return drinkCount;
+    }
+
+    public void setDrinkCount(float drinkCount) {
+        this.drinkCount = drinkCount;
     }
 
     public void computeDrinkCount() {
