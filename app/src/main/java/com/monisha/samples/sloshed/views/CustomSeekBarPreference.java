@@ -74,6 +74,7 @@ public class CustomSeekBarPreference extends Preference {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 value = i; //update global variable
+                persistInt(value);
                 String i_s = String.valueOf(i); //create temporary string value
                 textView_summary.setText(i_s); //set summary // it's currently invisible
                 if (!seekbarValue.getText().equals(i_s)) { //if this new value is not already set in the edittext
@@ -124,6 +125,7 @@ public class CustomSeekBarPreference extends Preference {
                         try {
                             value = Integer.parseInt(editText.getText().toString());
                             seekBar.setProgress(value);
+                            persistInt(value);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

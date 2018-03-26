@@ -33,6 +33,8 @@ import com.google.android.gms.tasks.Task;
 import com.monisha.samples.sloshed.R;
 import com.monisha.samples.sloshed.activities.MainActivity;
 
+import java.util.Calendar;
+
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
@@ -46,23 +48,18 @@ public class MeterFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_DIALOGUE = "param1";
     private static final String ARG_MIN = "param2";
-
+    protected GeoDataClient mGeoDataClient;
     // TODO: Rename and change types of parameters
     private boolean showDialog;
     private int minAfterLastMeal;
-
     private OnFragmentInteractionListener mListener;
-
     private TextView percentageTV, messageTV;
     private SpeedView meter;
-
     private LinearLayout drunkModeLayout;
     private Button endMyNightBtn;
     private LinearLayout addNewDrinkBtn, addPrevDrinkBtn;
     private RelativeLayout sosLayout;
     private PlaceDetectionClient mPlaceDetectionClient;
-    protected GeoDataClient mGeoDataClient;
-
     private Switch initiateDrunkModeSwitch;
 
     private float drinkCount = 0;
@@ -108,15 +105,15 @@ public class MeterFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_meter, container, false);
 
-        meter = (SpeedView) view.findViewById(R.id.meter);
-        meter.setSpeedTextColor(ContextCompat.getColor(getContext(), R.color.colorTransparent));
+        meter = view.findViewById(R.id.meter);
+        meter.setSpeedTextColor(ContextCompat.getColor(getActivity(), R.color.colorTransparent));
         setLevels(); //TODO compute as per the user profile
 
-        percentageTV = (TextView) view.findViewById(R.id.percentage_info);
-        messageTV = (TextView) view.findViewById(R.id.message_info);
-        drunkModeLayout = (LinearLayout) view.findViewById(R.id.drunk_mode_layout);
-        sosLayout = (RelativeLayout)view.findViewById(R.id.sos_layout);
-        endMyNightBtn = (Button) view.findViewById(R.id.end_my_night_btn);
+        percentageTV = view.findViewById(R.id.percentage_info);
+        messageTV = view.findViewById(R.id.message_info);
+        drunkModeLayout = view.findViewById(R.id.drunk_mode_layout);
+        sosLayout = view.findViewById(R.id.sos_layout);
+        endMyNightBtn = view.findViewById(R.id.end_my_night_btn);
         if (ContextCompat.checkSelfPermission(this.getActivity(),
                 Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -157,8 +154,8 @@ public class MeterFragment extends Fragment {
             }
         });
 
-        addNewDrinkBtn = (LinearLayout) view.findViewById(R.id.add_new_drink_btn);
-        addPrevDrinkBtn = (LinearLayout) view.findViewById(R.id.repeat_drink_btn);
+        addNewDrinkBtn = view.findViewById(R.id.add_new_drink_btn);
+        addPrevDrinkBtn = view.findViewById(R.id.repeat_drink_btn);
 
         if (((MainActivity) getActivity()).previousDrink != null && ((MainActivity) getActivity()).previousDrink.getQuantity() != 0 && ((MainActivity) getActivity()).previousDrink.getAlcoholPercentage() != 0) {
             addPrevDrinkBtn.setVisibility(View.VISIBLE);
@@ -170,6 +167,8 @@ public class MeterFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //TODO add code to update meter
+                //udate the time stamp
+                ((MainActivity) getActivity()).previousDrink.setTimestamp(Calendar.getInstance().getTimeInMillis());
                 ((MainActivity) getActivity()).user.addDrink(((MainActivity) getActivity()).previousDrink);
                 setMeter();//update meter
                 Toast.makeText(getActivity(), "Drink has been added!", Toast.LENGTH_LONG).show();
@@ -185,7 +184,7 @@ public class MeterFragment extends Fragment {
             }
         });
 
-        initiateDrunkModeSwitch = (Switch) view.findViewById(R.id.drunk_mode_switch);
+        initiateDrunkModeSwitch = view.findViewById(R.id.drunk_mode_switch);
         initiateDrunkModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -260,23 +259,6 @@ public class MeterFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onMeterFragmentInteraction();
-
-        void getDrinksListing();
-    }
-
     private void getPlaces() {
         if (ContextCompat.checkSelfPermission(this.getActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -330,5 +312,22 @@ public class MeterFragment extends Fragment {
     private void sendSMS(String phoneNumber, String message) {
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, message, null, null);
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onMeterFragmentInteraction();
+
+        void getDrinksListing();
     }
 }
