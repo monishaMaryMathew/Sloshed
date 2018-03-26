@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.WRITE_CONTACTS"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.CALL_PHONE"/>
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
+
 
     <uses-feature
         android:name="android.hardware.telephony"
@@ -26,6 +28,17 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+        <receiver android:directBootAware= "false"
+        android:enabled="true"
+        android:exported= "false"
+        android:label="notsloshed"
+        android:name=".util.BlockOutgoing"
+        android:permission="android.permission.PROCESS_OUTGOING_CALLS"
+        >
+            <intent-filter android:priority="1">
+                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".activities.MainActivity"
