@@ -10,4 +10,14 @@
         android:layout_height="match_parent"
         android:text="Settings Fragment" />
 
+    <!--<Button-->
+    <!--android:id="@+id/btnOpenSettings"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignLeft="@+id/TWAddress"-->
+    <!--android:layout_alignStart="@+id/TWAddress"-->
+    <!--android:layout_below="@+id/editText5"-->
+    <!--android:layout_marginTop="100dp"-->
+    <!--&lt;!&ndash;android:onClick="btnOpenSettings_onClick"&ndash;&gt;-->
+    <!--android:text="Open Better Settings" />-->
 </FrameLayout>
