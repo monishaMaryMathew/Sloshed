@@ -140,4 +140,18 @@ public class UserDB {
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
     }
+
+    public void updateUserObj(UserDB newUser) {
+        this.weight = newUser.getWeight();
+        this.gender = newUser.getGender();
+        this.age = newUser.getAge();
+        this.message = newUser.getMessage();
+        this.isBacAllowed = newUser.getIsBacAllowed();
+        this.bacThreshold = newUser.getBacThreshold();
+        this.blockedForHour = newUser.getBlockedForHour();
+        this.addressLine1 = newUser.getAddressLine1();
+        this.addressLine2 = newUser.getAddressLine2();
+        this.city = newUser.getCity();
+        this.zipCode = newUser.getZipCode();
+    }
 }
