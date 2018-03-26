@@ -3,6 +3,7 @@ package com.monisha.samples.sloshed.fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.monisha.samples.sloshed.R;
 import com.monisha.samples.sloshed.activities.MainActivity;
+import com.monisha.samples.sloshed.util.BlockOutgoing;
 
 import java.util.Calendar;
 
@@ -48,18 +50,24 @@ public class MeterFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_DIALOGUE = "param1";
     private static final String ARG_MIN = "param2";
-    protected GeoDataClient mGeoDataClient;
+
     // TODO: Rename and change types of parameters
     private boolean showDialog;
     private int minAfterLastMeal;
+
     private OnFragmentInteractionListener mListener;
+
     private TextView percentageTV, messageTV;
     private SpeedView meter;
+
     private LinearLayout drunkModeLayout;
     private Button endMyNightBtn;
     private LinearLayout addNewDrinkBtn, addPrevDrinkBtn;
+    private RelativeLayout drunkDialBlock;
     private RelativeLayout sosLayout;
     private PlaceDetectionClient mPlaceDetectionClient;
+    protected GeoDataClient mGeoDataClient;
+    private ComponentName component;
     private Switch initiateDrunkModeSwitch;
 
     private float drinkCount = 0;
@@ -105,15 +113,16 @@ public class MeterFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_meter, container, false);
 
-        meter = view.findViewById(R.id.meter);
-        meter.setSpeedTextColor(ContextCompat.getColor(getActivity(), R.color.colorTransparent));
+        meter = (SpeedView) view.findViewById(R.id.meter);
+        meter.setSpeedTextColor(ContextCompat.getColor(getContext(), R.color.colorTransparent));
         setLevels(); //TODO compute as per the user profile
-
-        percentageTV = view.findViewById(R.id.percentage_info);
-        messageTV = view.findViewById(R.id.message_info);
-        drunkModeLayout = view.findViewById(R.id.drunk_mode_layout);
-        sosLayout = view.findViewById(R.id.sos_layout);
-        endMyNightBtn = view.findViewById(R.id.end_my_night_btn);
+        percentageTV = (TextView) view.findViewById(R.id.percentage_info);
+        messageTV = (TextView) view.findViewById(R.id.message_info);
+        drunkModeLayout = (LinearLayout) view.findViewById(R.id.drunk_mode_layout);
+        sosLayout = (RelativeLayout)view.findViewById(R.id.sos_layout);
+        drunkDialBlock =(RelativeLayout)view.findViewById(R.id.drunk_dial_layout);
+        endMyNightBtn = (Button) view.findViewById(R.id.end_my_night_btn);
+        component = new ComponentName(getContext(), BlockOutgoing.class);
         if (ContextCompat.checkSelfPermission(this.getActivity(),
                 Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -154,8 +163,8 @@ public class MeterFragment extends Fragment {
             }
         });
 
-        addNewDrinkBtn = view.findViewById(R.id.add_new_drink_btn);
-        addPrevDrinkBtn = view.findViewById(R.id.repeat_drink_btn);
+        addNewDrinkBtn = (LinearLayout) view.findViewById(R.id.add_new_drink_btn);
+        addPrevDrinkBtn = (LinearLayout) view.findViewById(R.id.repeat_drink_btn);
 
         if (((MainActivity) getActivity()).previousDrink != null && ((MainActivity) getActivity()).previousDrink.getQuantity() != 0 && ((MainActivity) getActivity()).previousDrink.getAlcoholPercentage() != 0) {
             addPrevDrinkBtn.setVisibility(View.VISIBLE);
@@ -184,7 +193,7 @@ public class MeterFragment extends Fragment {
             }
         });
 
-        initiateDrunkModeSwitch = view.findViewById(R.id.drunk_mode_switch);
+        initiateDrunkModeSwitch = (Switch) view.findViewById(R.id.drunk_mode_switch);
         initiateDrunkModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
@@ -213,8 +222,42 @@ public class MeterFragment extends Fragment {
     private void initiateDrunkMode(boolean initiate) {
         if (initiate) {
             drunkModeLayout.setVisibility(View.VISIBLE);
+            if (ContextCompat.checkSelfPermission(this.getActivity(),
+                    Manifest.permission.PROCESS_OUTGOING_CALLS)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Permission is not granted
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this.getActivity(),
+                        Manifest.permission.PROCESS_OUTGOING_CALLS)) {
+
+                    // Show an explanation to the user *asynchronously* -- don't block
+                    // this thread waiting for the user's response! After the user
+                    // sees the explanation, try again to request the permission.
+
+                } else {
+
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(this.getActivity(),
+                            new String[]{Manifest.permission.PROCESS_OUTGOING_CALLS},
+                            100);
+
+                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                    // app-defined int constant. The callback method gets the
+                    // result of the request.
+                }
+            } else {
+                drunkDialBlock.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                       getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_ENABLED , PackageManager.DONT_KILL_APP);
+                    }
+                });
+            }
+
         } else {
             drunkModeLayout.setVisibility(View.GONE);
+            getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_DISABLED , PackageManager.DONT_KILL_APP);
         }
     }
 
@@ -257,6 +300,23 @@ public class MeterFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onMeterFragmentInteraction();
+
+        void getDrinksListing();
     }
 
     private void getPlaces() {
@@ -312,22 +372,5 @@ public class MeterFragment extends Fragment {
     private void sendSMS(String phoneNumber, String message) {
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, message, null, null);
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onMeterFragmentInteraction();
-
-        void getDrinksListing();
     }
 }
