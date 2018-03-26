@@ -27,6 +27,24 @@ public class UserDB {
     @ColumnInfo(name = "is_bac_allowed")
     public int isBacAllowed;
 
+    @ColumnInfo(name = "bac_threshold")
+    public float bacThreshold;
+
+    @ColumnInfo(name = "blocked_for_hour")
+    public int blockedForHour;
+
+    @ColumnInfo(name = "address_line_1")
+    public String addressLine1;
+
+    @ColumnInfo(name = "address_line_2")
+    public String addressLine2;
+
+    @ColumnInfo(name = "city")
+    public String city;
+
+    @ColumnInfo(name = "zipcode")
+    public String zipCode;
+
     public int getUid() {
         return uid;
     }
@@ -73,5 +91,53 @@ public class UserDB {
 
     public void setIsBacAllowed(int isBacAllowed) {
         this.isBacAllowed = isBacAllowed;
+    }
+
+    public float getBacThreshold() {
+        return bacThreshold;
+    }
+
+    public void setBacThreshold(float bacThreshold) {
+        this.bacThreshold = bacThreshold;
+    }
+
+    public int getBlockedForHour() {
+        return blockedForHour;
+    }
+
+    public void setBlockedForHour(int blockedForHour) {
+        this.blockedForHour = blockedForHour;
+    }
+
+    public String getAddressLine1() {
+        return addressLine1;
+    }
+
+    public void setAddressLine1(String addressLine1) {
+        this.addressLine1 = addressLine1;
+    }
+
+    public String getAddressLine2() {
+        return addressLine2;
+    }
+
+    public void setAddressLine2(String addressLine2) {
+        this.addressLine2 = addressLine2;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
     }
 }
