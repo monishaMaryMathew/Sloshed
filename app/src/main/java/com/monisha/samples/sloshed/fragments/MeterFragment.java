@@ -3,10 +3,14 @@ package com.monisha.samples.sloshed.fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -69,8 +73,13 @@ public class MeterFragment extends Fragment {
     protected GeoDataClient mGeoDataClient;
     private ComponentName component;
     private Switch initiateDrunkModeSwitch;
+    public static final String ABORT_PHONE_NUMBER = "+13134245612";
+
+    private static final String OUTGOING_CALL_ACTION = "android.intent.action.NEW_OUTGOING_CALL";
+    private static final String INTENT_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
 
     private float drinkCount = 0;
+    boolean isRegistered = false;
     
 
     public MeterFragment() {
@@ -220,8 +229,30 @@ public class MeterFragment extends Fragment {
     }
 
     private void initiateDrunkMode(boolean initiate) {
+        final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
+        final BroadcastReceiver blockCall = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("out", "OutgoingCallReceiver onReceive");
+                if (intent.getAction().equals(OUTGOING_CALL_ACTION)) {
+                    Log.d("out", "OutgoingCallReceiver NEW_OUTGOING_CALL received");
+
+                    // get phone number from bundle
+                    String phoneNumber = intent.getExtras().getString(INTENT_PHONE_NUMBER);
+           /* makeText(context,"blah"+phoneNumber,Toast.LENGTH_SHORT).show();
+            makeText(context,"blue"+ABORT_PHONE_NUMBER,Toast.LENGTH_SHORT).show();*/
+                    if ((phoneNumber != null) && phoneNumber.trim().equals("+13134245612")) {
+                        setResultData(null);
+                        Toast.makeText(context, "Outgoing Call Blocke",Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+            }
+        };
         if (initiate) {
             drunkModeLayout.setVisibility(View.VISIBLE);
+
             if (ContextCompat.checkSelfPermission(this.getActivity(),
                     Manifest.permission.PROCESS_OUTGOING_CALLS)
                     != PackageManager.PERMISSION_GRANTED) {
@@ -250,14 +281,31 @@ public class MeterFragment extends Fragment {
                 drunkDialBlock.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                       getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_ENABLED , PackageManager.DONT_KILL_APP);
+
+                        getContext().registerReceiver(blockCall,intentFilter);
+                      // getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_ENABLED , PackageManager.DONT_KILL_APP);
+                        isRegistered = true;
+                        Handler mHandler = new Handler();
+                        mHandler.postDelayed(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                if (isRegistered) {
+                                    getContext().unregisterReceiver(blockCall);
+                                    isRegistered = false;
+                                }
+                                Toast.makeText(getContext(),"unblocking",Toast.LENGTH_LONG).show();
+                            }
+
+                        }, 60000L);
                     }
                 });
             }
 
         } else {
             drunkModeLayout.setVisibility(View.GONE);
-            getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_DISABLED , PackageManager.DONT_KILL_APP);
+
+            //getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_DISABLED , PackageManager.DONT_KILL_APP);
         }
     }
 
@@ -300,6 +348,7 @@ public class MeterFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+
     }
 
     /**
