@@ -1,6 +1,10 @@
 <preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <!-- These settings headers are only used on tablets. -->
+
+
+    <!--    Notification is Emeregency contact, DataSyncPreference is Drunk Dial   -->
 
     <header
         android:fragment="com.monisha.samples.sloshed.activities.SettingsActivity$GeneralPreferenceFragment"
@@ -10,11 +14,10 @@
     <header
         android:fragment="com.monisha.samples.sloshed.activities.SettingsActivity$NotificationPreferenceFragment"
         android:icon="@drawable/ic_notifications_black_24dp"
-        android:title="@string/pref_header_notifications" />
+        android:title="Emergency Contacts" />
 
     <header
         android:fragment="com.monisha.samples.sloshed.activities.SettingsActivity$DataSyncPreferenceFragment"
         android:icon="@drawable/ic_sync_black_24dp"
-        android:title="@string/pref_header_data_sync" />
-
+        android:title="Block Contacts" />
 </preference-headers>

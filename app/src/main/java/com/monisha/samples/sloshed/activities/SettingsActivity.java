@@ -1,5 +1,6 @@
 package com.monisha.samples.sloshed.activities;
 
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -40,9 +41,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
+
+
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
+
+//            if(preference.getKey()=="seekbar_age"){
+//
+//                preference.setSummary(value.toString());
+//            }
+
             String stringValue = value.toString();
 
             if (preference instanceof ListPreference) {
@@ -156,6 +165,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * This method stops fragment injection in malicious applications.
      * Make sure to deny any unknown fragments here.
      */
+
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
@@ -163,12 +173,23 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName);
     }
 
+
     /**
      * This fragment shows general preferences only. It is used when the
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
+
+
+        private static final String PREFERENCE_NS =
+                "http://schemas.android.com/apk/res/com.mnm.seekbarpreference";
+        private static final String ANDROID_NS = "http://schemas.android.com/apk/res/android";
+
+        private static final String ATTR_DEFAULT_VALUE = "defaultValue";
+        private static final String ATTR_MIN_VALUE = "minValue";
+        private static final String ATTR_MAX_VALUE = "maxValue";
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -180,7 +201,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
+            bindPreferenceSummaryToValue(findPreference("list_preference_gender"));
+            bindPreferenceSummaryToValue(findPreference("list_preference_age"));
+            bindPreferenceSummaryToValue(findPreference("edit_text_preference_address"));
+            //bindPreferenceSummaryToValue(findPreference("example_list"));
+            //bindPreferenceSummaryToValue(findPreference("seekbar_age"));
+
+
         }
 
         @Override
@@ -192,6 +219,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+
+
     }
 
     /**
@@ -210,7 +239,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+//            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
+            bindPreferenceSummaryToValue(findPreference("edit_text_preference_drunk_message"));
         }
 
         @Override
@@ -240,7 +270,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+            //bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+            bindPreferenceSummaryToValue(findPreference("list_preference_block_time"));
         }
 
         @Override
@@ -253,4 +284,5 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return super.onOptionsItemSelected(item);
         }
     }
+
 }

@@ -1,13 +1,4 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="example_switch"
-        android:summary="@string/pref_description_social_recommendations"
-        android:title="@string/pref_title_social_recommendations" />
-
-    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
-    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
         android:capitalize="words"
         android:defaultValue="@string/pref_default_display_name"
@@ -17,17 +8,63 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"
         android:title="@string/pref_title_display_name" />
+    <ListPreference
+        android:defaultValue="1"
+        android:entries="@array/list_gender_values"
+        android:entryValues="@array/list_gender_values"
+        android:key="list_preference_gender"
+        android:title="Gender" />
+
+    <!--<com.monisha.samples.sloshed.util.CustomSeekBar-->
+    <!--android:key="seekbar_age"-->
+    <!--android:title="Age"-->
+    <!--android:layout_width="300dp"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:summary= "21"-->
+    <!--android:max="100"/>-->
+    <!--android:defaulValue = "21"-->
+
+    <!--example:minValue="21"-->
+    <!--example:maxValue="100"-->
+
+
+    <!--</SeekBarPreference>-->
+    <!--android:defaultValue="21"-->
+
+
+    <ListPreference
+        android:defaultValue="21"
+        android:entries="@array/list_age_values"
+        android:entryValues="@array/list_age_values"
+        android:key="list_preference_age"
+        android:title="Age" />
+
+    <EditTextPreference
+        android:defaultValue="Default value"
+        android:inputType="textCapWords"
+        android:key="edit_text_preference_address"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Address" />
+    <!--<SwitchPreference-->
+    <!--android:defaultValue="true"-->
+    <!--android:key="example_switch"-->
+    <!--android:summary="@string/pref_description_social_recommendations"-->
+    <!--android:title="@string/pref_title_social_recommendations" />-->
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
 
     <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
          dismiss it. -->
     <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
-    <ListPreference
-        android:defaultValue="-1"
-        android:entries="@array/pref_example_list_titles"
-        android:entryValues="@array/pref_example_list_values"
-        android:key="example_list"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:title="@string/pref_title_add_friends_to_messages" />
+    <!--<ListPreference-->
+    <!--android:defaultValue="-1"-->
+    <!--android:entries="@array/pref_example_list_titles"-->
+    <!--android:entryValues="@array/pref_example_list_values"-->
+    <!--android:key="example_list"-->
+    <!--android:negativeButtonText="@null"-->
+    <!--android:positiveButtonText="@null"-->
+    <!--android:title="@string/pref_title_add_friends_to_messages" />-->
 
 </PreferenceScreen>

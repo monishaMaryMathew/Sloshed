@@ -3,12 +3,16 @@ package com.monisha.samples.sloshed.activities;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.monisha.samples.sloshed.R;
@@ -18,16 +22,17 @@ import com.monisha.samples.sloshed.fragments.DashboardFragment;
 import com.monisha.samples.sloshed.fragments.DrinkSelectionFragment;
 import com.monisha.samples.sloshed.fragments.MealFragment;
 import com.monisha.samples.sloshed.fragments.MeterFragment;
-import com.monisha.samples.sloshed.fragments.SettingsFragment;
 import com.monisha.samples.sloshed.fragments.StartNightFragment;
 import com.monisha.samples.sloshed.models.Drink;
 import com.monisha.samples.sloshed.models.User;
 import com.monisha.samples.sloshed.util.StageEnum;
 
+//import com.monisha.samples.sloshed.fragments.SettingsFragment;
+
 public class MainActivity extends AppCompatActivity implements
         CheckRateFragment.OnFragmentInteractionListener,
         DashboardFragment.OnFragmentInteractionListener,
-        SettingsFragment.OnFragmentInteractionListener,
+        //SettingsFragment.OnFragmentInteractionListener,
         StartNightFragment.OnFragmentInteractionListener,
         MealFragment.OnFragmentInteractionListener,
         MeterFragment.OnFragmentInteractionListener,
@@ -35,13 +40,11 @@ public class MainActivity extends AppCompatActivity implements
         DrinkSelectionFragment.OnFragmentInteractionListener
 
 {
+    public Drink previousDrink = null;
+    public User user = new User();
     private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction;
     private StageEnum checkRateStage = StageEnum.START_MY_NIGHT;
-
-    public Drink previousDrink = null;
-    public User user = new User();
-
     private int minAfterLastMeal = 0;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -59,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements
                     fragment = new CheckRateFragment().newInstance(checkRateStage);
                     break;
                 case R.id.navigation_settings:
-                    fragment = new SettingsFragment();
+                    //fragment = new SettingsFragment();
                     break;
             }
             if(fragment!=null){
@@ -71,10 +74,38 @@ public class MainActivity extends AppCompatActivity implements
         }
     };
 
+    //@Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.upper_nav_settings, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                // User chose the "Settings" item, show the app settings UI...
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.upper_nav_settings);
+        setSupportActionBar(myToolbar);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -84,9 +115,10 @@ public class MainActivity extends AppCompatActivity implements
         fragmentTransaction.commit();
     }
 
-    @Override
+    // @Override
     public void onSettingsFragmentInteraction(Uri uri) {
-
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     @Override
@@ -99,12 +131,12 @@ public class MainActivity extends AppCompatActivity implements
         return minAfterLastMeal;
     }
 
-    public void setCheckRateStage(StageEnum stage){
-        checkRateStage = stage;
-    }
-
     public StageEnum getCheckRateStage(){
         return checkRateStage;
+    }
+
+    public void setCheckRateStage(StageEnum stage) {
+        checkRateStage = stage;
     }
 
     @Override
@@ -190,5 +222,10 @@ public class MainActivity extends AppCompatActivity implements
 
                 break;
         }
+    }
+
+    public void btnOpenSettings_onClick(View view) {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 }
