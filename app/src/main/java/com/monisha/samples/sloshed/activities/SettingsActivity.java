@@ -18,6 +18,7 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.monisha.samples.sloshed.R;
@@ -127,9 +128,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         .getString(preference.getKey(), ""));
     }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.empty_nav_menu, menu);
+
+        return true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //setContentView(R.layout.activity_main);
         setupActionBar();
     }
 
@@ -137,6 +146,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * Set up the {@link android.app.ActionBar}, if the API is available.
      */
     private void setupActionBar() {
+
+
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             // Show the Up button in the action bar.

@@ -8,16 +8,6 @@
     tools:context="com.monisha.samples.sloshed.activities.MainActivity">
 
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/upper_nav_settings"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:elevation="4dp"
-        android:theme="@style/AppTheme"
-        app:menu="@menu/upper_nav_settings" />
-    <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"/>-->
-
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"

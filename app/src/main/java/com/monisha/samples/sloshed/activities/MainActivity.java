@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -104,8 +103,8 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.upper_nav_settings);
-        setSupportActionBar(myToolbar);
+//        Toolbar myToolbar = (Toolbar) findViewById(R.id.upper_nav_settings);
+//        setSupportActionBar(myToolbar);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
