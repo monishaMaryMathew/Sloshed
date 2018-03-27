@@ -3,12 +3,14 @@ package com.monisha.samples.sloshed.fragments;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -37,9 +39,17 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.monisha.samples.sloshed.R;
 import com.monisha.samples.sloshed.activities.MainActivity;
+import com.monisha.samples.sloshed.dbmodels.BlockedContactDB;
+import com.monisha.samples.sloshed.dbmodels.EmergencyContactDB;
+import com.monisha.samples.sloshed.models.User;
+import com.monisha.samples.sloshed.util.AppDatabase;
 import com.monisha.samples.sloshed.util.BlockOutgoing;
+import com.monisha.samples.sloshed.util.GetBlockedEmergencyContacts;
 
 import java.util.Calendar;
+import java.util.List;
+
+import static android.widget.Toast.*;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -63,6 +73,7 @@ public class MeterFragment extends Fragment {
 
     private TextView percentageTV, messageTV;
     private SpeedView meter;
+    AppDatabase db;
 
     private LinearLayout drunkModeLayout;
     private Button endMyNightBtn;
@@ -74,6 +85,8 @@ public class MeterFragment extends Fragment {
     private ComponentName component;
     private Switch initiateDrunkModeSwitch;
     public static final String ABORT_PHONE_NUMBER = "+13134245612";
+    List<BlockedContactDB> blockedContacts;
+    List<EmergencyContactDB> emergencyContacts;
 
     private static final String OUTGOING_CALL_ACTION = "android.intent.action.NEW_OUTGOING_CALL";
     private static final String INTENT_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
@@ -113,6 +126,61 @@ public class MeterFragment extends Fragment {
         mGeoDataClient = Places.getGeoDataClient(this.getActivity());
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this.getActivity());
+        MainActivity mainActivity = (MainActivity)getActivity();
+        User user = mainActivity.user;
+        db = AppDatabase.getAppDatabase(getContext());
+        if(user.getBlockedContacts().size()==0 || user.getEmergencyContacts().size()==0){
+            //GetBlockedEmergencyContacts blocked = new G {
+            AsyncTask task1 = new AsyncTask() {
+                @Override
+                protected Object doInBackground(Object[] objects) {
+                   // AppDatabase db =  AppDatabase.getAppDatabase(getContext());
+                    blockedContacts = db.blockedContactDAO().getAll();
+                    //emergencyContacts = db.emergencyContactDAO().getAll();
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Object o) {
+
+                    for(BlockedContactDB emergency: blockedContacts){
+                        Log.d(emergency.getContactName(),emergency.getPhoneNumber());
+                    }
+                    super.onPostExecute(o);
+                }
+
+
+            };
+            AsyncTask task2 = new AsyncTask() {
+                @Override
+                protected Object doInBackground(Object[] objects) {
+                   // AppDatabase db =  AppDatabase.getAppDatabase(getContext());
+                    emergencyContacts = db.emergencyContactDAO().getAll();
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Object o) {
+
+
+
+                    for(EmergencyContactDB emergency: emergencyContacts){
+                        Log.d(emergency.getContactName(),emergency.getPhoneNumber());
+                    }
+                    super.onPostExecute(o);
+                }
+
+
+            };
+            //GetBlockedEmergencyContacts contact = new GetBlockedEmergencyContacts(this.getContext());
+            //contact.execute();
+            task1.execute();
+            task2.execute();
+        }
+        else{
+            blockedContacts= user.getBlockedContacts();
+            emergencyContacts = user.getEmergencyContacts();
+        }
 
     }
 
@@ -189,7 +257,7 @@ public class MeterFragment extends Fragment {
                 ((MainActivity) getActivity()).previousDrink.setTimestamp(Calendar.getInstance().getTimeInMillis());
                 ((MainActivity) getActivity()).user.addDrink(((MainActivity) getActivity()).previousDrink);
                 setMeter();//update meter
-                Toast.makeText(getActivity(), "Drink has been added!", Toast.LENGTH_LONG).show();
+                makeText(getActivity(), "Drink has been added!", LENGTH_LONG).show();
             }
         });
 
@@ -228,7 +296,10 @@ public class MeterFragment extends Fragment {
         meter.setMediumSpeedPercent(med);
     }
 
-    private void initiateDrunkMode(boolean initiate) {
+    private void initiateDrunkMode(final boolean initiate) {
+
+        //final List<BlockedContactDB> BlockedContacts = data.loadBlockedContacts();
+
         final IntentFilter intentFilter = new IntentFilter(Intent.ACTION_NEW_OUTGOING_CALL);
         final BroadcastReceiver blockCall = new BroadcastReceiver() {
 
@@ -240,13 +311,15 @@ public class MeterFragment extends Fragment {
 
                     // get phone number from bundle
                     String phoneNumber = intent.getExtras().getString(INTENT_PHONE_NUMBER);
-           /* makeText(context,"blah"+phoneNumber,Toast.LENGTH_SHORT).show();
-            makeText(context,"blue"+ABORT_PHONE_NUMBER,Toast.LENGTH_SHORT).show();*/
-                    if ((phoneNumber != null) && phoneNumber.trim().equals("+13134245612")) {
-                        setResultData(null);
-                        Toast.makeText(context, "Outgoing Call Blocke",Toast.LENGTH_SHORT).show();
+                  //for(BlockedContactDB block: BlockedContacts) {
+                     // Log.d(block.getContactName(),block.getPhoneNumber());
+                    for(BlockedContactDB block:blockedContacts) {
+                        if ((phoneNumber != null) && phoneNumber.trim().equals(block.getPhoneNumber().trim())) {
+                            setResultData(null);
+                            makeText(context, "Outgoing Call Blocked", LENGTH_SHORT).show();
+                            //}
+                        }
                     }
-
                 }
             }
         };
@@ -278,6 +351,7 @@ public class MeterFragment extends Fragment {
                     // result of the request.
                 }
             } else {
+
                 drunkDialBlock.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -285,6 +359,7 @@ public class MeterFragment extends Fragment {
                         getContext().registerReceiver(blockCall,intentFilter);
                       // getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_ENABLED , PackageManager.DONT_KILL_APP);
                         isRegistered = true;
+                        makeText(getContext(),"You will not be able to call the contacts you have blocked", LENGTH_LONG).show();
                         Handler mHandler = new Handler();
                         mHandler.postDelayed(new Runnable() {
 
@@ -294,7 +369,7 @@ public class MeterFragment extends Fragment {
                                     getContext().unregisterReceiver(blockCall);
                                     isRegistered = false;
                                 }
-                                Toast.makeText(getContext(),"unblocking",Toast.LENGTH_LONG).show();
+                                makeText(getContext(),"unblocking", LENGTH_LONG).show();
                             }
 
                         }, 60000L);
@@ -406,13 +481,18 @@ public class MeterFragment extends Fragment {
                         Log.i("lo", String.format("Place '%s' has likelihood: %g",
                                 placeLikelihood.getPlace().getName(),
                                 placeLikelihood.getLikelihood()));
-                        if(placeLikelihood.getLikelihood()>0.05) {
+                        if(placeLikelihood.getLikelihood()>0.10) {
                             myLoc.append("Location Name: ").append(placeLikelihood.getPlace().getName().toString()+" ").append(", Location Address: ").append(placeLikelihood.getPlace().getAddress().toString()).append(" ");
                         }
 
                     }
                     likelyPlaces.release();
-                    sendSMS("7038395635", "I need HELP!.I am currently around these locations:"+ myLoc.toString());
+                    for(EmergencyContactDB emergencyContact:emergencyContacts) {
+                        Log.d("test",emergencyContact.getPhoneNumber());
+                        makeText(getContext(),"Sending message to:"+emergencyContact.getPhoneNumber(), LENGTH_LONG).show();
+                        sendSMS(emergencyContact.getPhoneNumber(), "I need HELP!.I am currently around these locations:" + myLoc.toString());
+                    }
+
                 }
             });
         }
@@ -420,6 +500,13 @@ public class MeterFragment extends Fragment {
 
     private void sendSMS(String phoneNumber, String message) {
         SmsManager sms = SmsManager.getDefault();
+        PendingIntent sentPI;
+        String SENT = "SMS_SENT";
+
+        sentPI = PendingIntent.getBroadcast(getContext(), 0,new Intent(SENT), 0);
+
+        //sms.sendTextMessage(phoneNumber, null, message, sentPI, null);
+        //SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, message, null, null);
     }
 }
