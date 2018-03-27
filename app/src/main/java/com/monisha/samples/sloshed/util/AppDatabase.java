@@ -19,7 +19,7 @@ import com.monisha.samples.sloshed.dbmodels.UserDB;
  */
 
 
-@Database(entities = {BlockedContactDB.class, EmergencyContactDB.class, UserDB.class, DrinkDB.class}, version = 5)
+@Database(entities = {BlockedContactDB.class, EmergencyContactDB.class, UserDB.class, DrinkDB.class}, version = 6)
 public abstract class AppDatabase extends RoomDatabase {
 
     private static AppDatabase INSTANCE;

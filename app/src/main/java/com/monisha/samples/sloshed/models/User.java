@@ -20,6 +20,15 @@ public class User {
     private List<EmergencyContact> emergencyContacts = new ArrayList<EmergencyContact>();
     private List<BlockedContact> blockedContacts = new ArrayList<BlockedContact>();
 
+    private int blockedForHours;
+    private float bacThreshold;
+
+    private String addressLine1;
+    private String addressLine2;
+    private String city;
+    private String zipcode;
+
+
     //TODO Compute the following
     private int lowLevel;
     private int mediumLevel;
@@ -49,14 +58,22 @@ public class User {
         return lowLevel;
     }
 
+    public void setLowLevel(int lowLevel) {
+        this.lowLevel = lowLevel;
+    }
+    //compute drink levels
+    //driving impaired -
+    //danger
+
     public int getMediumLevel() {
         computeLevelCounts();
         computeLevelPercentages();
         return mediumLevel;
     }
-    //compute drink levels
-    //driving impaired -
-    //danger
+
+    public void setMediumLevel(int mediumLevel) {
+        this.mediumLevel = mediumLevel;
+    }
 
     private void computeLevelCounts() {
         if (genderEnum == GenderEnum.MALE) {
@@ -117,5 +134,123 @@ public class User {
         currentDrinkCount += drink.getDrinkCount();
     }
 
+    public int getBlockedForHours() {
+        return blockedForHours;
+    }
 
+    public void setBlockedForHours(int blockedForHours) {
+        this.blockedForHours = blockedForHours;
+    }
+
+    public float getBacThreshold() {
+        return bacThreshold;
+    }
+
+    public void setBacThreshold(float bacThreshold) {
+        this.bacThreshold = bacThreshold;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public GenderEnum getGenderEnum() {
+        return genderEnum;
+    }
+
+    public void setGenderEnum(GenderEnum genderEnum) {
+        this.genderEnum = genderEnum;
+    }
+
+    public List<EmergencyContact> getEmergencyContacts() {
+        return emergencyContacts;
+    }
+
+    public void setEmergencyContacts(List<EmergencyContact> emergencyContacts) {
+        this.emergencyContacts = emergencyContacts;
+    }
+
+    public List<BlockedContact> getBlockedContacts() {
+        return blockedContacts;
+    }
+
+    public void setBlockedContacts(List<BlockedContact> blockedContacts) {
+        this.blockedContacts = blockedContacts;
+    }
+
+    public int getLowLevelCount() {
+        return lowLevelCount;
+    }
+
+    public void setLowLevelCount(int lowLevelCount) {
+        this.lowLevelCount = lowLevelCount;
+    }
+
+    public int getMediumLevelCount() {
+        return mediumLevelCount;
+    }
+
+    public void setMediumLevelCount(int mediumLevelCount) {
+        this.mediumLevelCount = mediumLevelCount;
+    }
+
+    public List<Drink> getDrinksConsumed() {
+        return drinksConsumed;
+    }
+
+    public void setDrinksConsumed(List<Drink> drinksConsumed) {
+        this.drinksConsumed = drinksConsumed;
+    }
+
+    public float getCurrentDrinkCount() {
+        return currentDrinkCount;
+    }
+
+    public void setCurrentDrinkCount(float currentDrinkCount) {
+        this.currentDrinkCount = currentDrinkCount;
+    }
+
+    public String getAddressLine1() {
+        return addressLine1;
+    }
+
+    public void setAddressLine1(String addressLine1) {
+        this.addressLine1 = addressLine1;
+    }
+
+    public String getAddressLine2() {
+        return addressLine2;
+    }
+
+    public void setAddressLine2(String addressLine2) {
+        this.addressLine2 = addressLine2;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getZipcode() {
+        return zipcode;
+    }
+
+    public void setZipcode(String zipcode) {
+        this.zipcode = zipcode;
+    }
 }
