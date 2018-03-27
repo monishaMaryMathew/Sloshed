@@ -466,7 +466,7 @@ public class MeterFragment extends Fragment {
                     likelyPlaces.release();
                     for(EmergencyContactDB emergencyContact:emergencyContacts) {
                         Log.d("test",emergencyContact.getPhoneNumber());
-                        makeText(getContext(),"Sending message to:"+emergencyContact.getPhoneNumber(), LENGTH_LONG).show();
+                        makeText(getContext(),"Sending message to:"+emergencyContact.getPhoneNumber(), LENGTH_SHORT).show();
                         sendSMS(emergencyContact.getPhoneNumber(), "I need HELP!.I am currently around these locations:" + myLoc.toString());
                     }
 

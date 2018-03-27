@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -26,6 +27,8 @@ import com.monisha.samples.sloshed.models.Contact;
 import com.monisha.samples.sloshed.util.AppDatabase;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -118,24 +121,46 @@ public class getContactList extends AppCompatActivity {
 
     private ArrayList<Contact> createList() {
         ArrayList<Contact> mArrayList = new ArrayList<>();
-        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
-        while (cursor.moveToNext()) {
-            String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
-            String hasPhone = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
-            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-//            Log.d("TAG", hasPhone);
-            if (!hasPhone.equals("0")) {
-                // You know it has a number so now query it like this
-                Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
-                while (phones.moveToNext()) {
-                    String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-                    mArrayList.add(new Contact(phoneNumber, name));
-//                    Log.d("TAG", "Name:"+name);
-//                    Log.d("TAG", "number:"+phoneNumber);
-                }
-                phones.close();
-            }
+        String[] projection = new String[]{
+                ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                ContactsContract.CommonDataKinds.Phone.NUMBER,
+                ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER,
+                //plus any other properties you wish to query
+        };
+
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, projection, null, null, null);
+        } catch (SecurityException e) {
+            //SecurityException can be thrown if we don't have the right permissions
         }
+
+        if (cursor != null) {
+            try {
+                HashSet<String> normalizedNumbersAlreadyFound = new HashSet<>();
+                int indexOfNormalizedNumber = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NORMALIZED_NUMBER);
+                int indexOfDisplayName = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                int indexOfDisplayNumber = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+
+                while (cursor.moveToNext()) {
+                    String normalizedNumber = cursor.getString(indexOfNormalizedNumber);
+                    if (normalizedNumbersAlreadyFound.add(normalizedNumber)) {
+                        String displayName = cursor.getString(indexOfDisplayName);
+                        String displayNumber = cursor.getString(indexOfDisplayNumber);
+                        //haven't seen this number yet: do something with this contact!
+                        Log.d("displayName",displayName);
+                        Log.d("displayNumber",displayNumber);
+                        mArrayList.add(new Contact(displayNumber, displayName));
+                    } else {
+                        //don't do anything with this contact because we've already found this number
+                    }
+                }
+            } finally {
+                cursor.close();
+            }
+
+        }
+        Collections.sort(mArrayList);
         return mArrayList;
     }
 
