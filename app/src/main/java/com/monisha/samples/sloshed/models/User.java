@@ -1,5 +1,7 @@
 package com.monisha.samples.sloshed.models;
 
+import com.monisha.samples.sloshed.dbmodels.BlockedContactDB;
+import com.monisha.samples.sloshed.dbmodels.EmergencyContactDB;
 import com.monisha.samples.sloshed.util.GenderEnum;
 
 import java.util.ArrayList;
@@ -17,8 +19,8 @@ public class User {
     private GenderEnum genderEnum = GenderEnum.MALE;
     //Emergency Contact Info
     //check if at least one emergency contact information is available
-    private List<EmergencyContact> emergencyContacts = new ArrayList<EmergencyContact>();
-    private List<BlockedContact> blockedContacts = new ArrayList<BlockedContact>();
+    private List<EmergencyContactDB> emergencyContacts = new ArrayList<EmergencyContactDB>();
+    private List<BlockedContactDB> blockedContacts = new ArrayList<BlockedContactDB>();
 
     private int blockedForHours;
     private float bacThreshold;
@@ -44,7 +46,7 @@ public class User {
 
     }
 
-    public User(int weight, int age, GenderEnum genderEnum, List<EmergencyContact> emergencyContacts, List<BlockedContact> blockedContacts) {
+    public User(int weight, int age, GenderEnum genderEnum, List<EmergencyContactDB> emergencyContacts, List<BlockedContactDB> blockedContacts) {
         this.weight = weight;
         this.age = age;
         this.genderEnum = genderEnum;
@@ -174,19 +176,19 @@ public class User {
         this.genderEnum = genderEnum;
     }
 
-    public List<EmergencyContact> getEmergencyContacts() {
+    public List<EmergencyContactDB> getEmergencyContacts() {
         return emergencyContacts;
     }
 
-    public void setEmergencyContacts(List<EmergencyContact> emergencyContacts) {
+    public void setEmergencyContacts(List<EmergencyContactDB> emergencyContacts) {
         this.emergencyContacts = emergencyContacts;
     }
 
-    public List<BlockedContact> getBlockedContacts() {
+    public List<BlockedContactDB> getBlockedContacts() {
         return blockedContacts;
     }
 
-    public void setBlockedContacts(List<BlockedContact> blockedContacts) {
+    public void setBlockedContacts(List<BlockedContactDB> blockedContacts) {
         this.blockedContacts = blockedContacts;
     }
 
