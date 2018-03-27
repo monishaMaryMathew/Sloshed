@@ -31,21 +31,39 @@
     <!--</SeekBarPreference>-->
     <!--android:defaultValue="21"-->
 
-
     <ListPreference
+        android:defaultValue="3"
+        android:entries="@array/list_weight_values"
+        android:entryValues="@array/list_weight_values"
+        android:key="list_preference_weight"
+        android:title="Weight" />
+
+    <com.monisha.samples.sloshed.views.NumberPickerPreference
         android:defaultValue="21"
-        android:entries="@array/list_age_values"
-        android:entryValues="@array/list_age_values"
-        android:key="list_preference_age"
+        android:key="list_preference_age123"
         android:title="Age" />
 
+    <!--<com.monisha.samples.sloshed.views.NumberPickerPreference-->
+    <!--android:key="key_number"-->
+    <!--android:title="Give me a number"-->
+    <!--android:defaultValue="55"/>-->
+
     <EditTextPreference
-        android:defaultValue="Default value"
+        android:defaultValue="Enter Address"
         android:inputType="textCapWords"
         android:key="edit_text_preference_address"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:title="Address" />
+        android:title="Street Address" />
+
+    <EditTextPreference
+        android:defaultValue="00000"
+        android:inputType="textCapWords"
+        android:key="edit_text_preference_address_zip"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Zip Code" />
+
     <!--<SwitchPreference-->
     <!--android:defaultValue="true"-->
     <!--android:key="example_switch"-->

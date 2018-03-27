@@ -47,12 +47,20 @@
         <item>Never</item>
     </string-array>
 
-    <string-array name="list_block_time">
-        <item>3 hours</item>
-        <item>7 hours</item>
-        <item>12 hours</item>
-        <item>18 hours</item>
-        <item>24 hours</item>
+    <!--<string-array name="list_block_time">-->
+    <!--<item>3 hours</item>-->
+    <!--<item>7 hours</item>-->
+    <!--<item>12 hours</item>-->
+    <!--<item>18 hours</item>-->
+    <!--<item>24 hours</item>-->
+    <!--</string-array>-->
+
+    <string-array name="list_block_time_val">
+        <item>3</item>
+        <item>7</item>
+        <item>12</item>
+        <item>18</item>
+        <item>24</item>
     </string-array>
 
     <string-array name="list_preference_entries">
@@ -70,12 +78,24 @@
 
     <string-array name="multi_select_list_preference_default_value" />
 
-    <string-array name="list_age_values">
-        <item>21-99</item>
-        <item>22</item>
-        <item>23</item>
-        <item>24</item>
-        <item>add range later</item>
+    <!--<string-array name="list_age_values">-->
+    <!--<item>21-99</item>-->
+    <!--<item>22</item>-->
+    <!--<item>23</item>-->
+    <!--<item>24</item>-->
+    <!--<item>add range later</item>-->
+    <!--</string-array>-->
+
+    <string-array name="list_weight_values">
+        <item>below 90 lbs</item>
+        <item>91 - 100 lbs</item>
+        <item>101 - 120 lbs</item>
+        <item>121 - 140 lbs</item>
+        <item>141 - 160 lbs</item>
+        <item>161 - 180 lbs</item>
+        <item>201 - 220 lbs</item>
+        <item>221 - 240 lbs</item>
+        <item>above 241 lbs</item>
     </string-array>
 
     <string-array name="list_gender_values">

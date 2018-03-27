@@ -19,11 +19,11 @@
     <!--android:title="@string/pref_title_sync_frequency" />-->
 
     <ListPreference
-        android:defaultValue="7 hours"
-        android:entries="@array/list_block_time"
-        android:entryValues="@array/list_block_time"
+        android:defaultValue="2"
+        android:entries="@array/list_block_time_val"
+        android:entryValues="@array/list_block_time_val"
         android:key="list_preference_block_time"
-        android:title="Block Contacts for" />
+        android:title="Hours to Block Contacts for" />
 
 
     <Preference
