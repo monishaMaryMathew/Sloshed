@@ -2,41 +2,79 @@ package com.monisha.samples.sloshed.activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ListActivity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.dbmodels.BlockedContactDB;
+import com.monisha.samples.sloshed.dbmodels.EmergencyContactDB;
+import com.monisha.samples.sloshed.models.Contact;
+import com.monisha.samples.sloshed.util.AppDatabase;
 import com.monisha.samples.sloshed.util.RecyclerAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class getContactList extends AppCompatActivity {
     private Activity context;
     //RecyclerView recyclerView;
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private RecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
-
+    private Button cancelBtn, submitBtn;
+    private boolean blockedCaseAndNotEmergencyCase = false;
+    private RelativeLayout progressLayout;
+    private AppDatabase db;
+    private List<BlockedContactDB> b_list = new ArrayList<>();
+    private List<EmergencyContactDB> e_list = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_get_contact_list);
+
+        if (this.getIntent().hasExtra("case")) {
+            String caseType = this.getIntent().getStringExtra("case");
+            if (caseType.equals("blocked")) {
+                blockedCaseAndNotEmergencyCase = true;
+            } else if (caseType.equals("emergency")) {
+                blockedCaseAndNotEmergencyCase = false;
+            }
+        }
+
+        progressLayout = findViewById(R.id.progressbar_layout);
+        cancelBtn = findViewById(R.id.cancel_btn);
+        submitBtn = findViewById(R.id.submit_btn);
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                intentBackToCallingActivity();
+            }
+        });
+
+        submitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onSubmit();
+            }
+        });
+
         this.context = context;
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_CONTACTS)
@@ -63,32 +101,91 @@ public class getContactList extends AppCompatActivity {
                 // result of the request.
             }
         } else {
-            Cursor cur = getContacts();
-            recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-            // use this setting to
-            // improve performance if you know that changes
-            // in content do not change the layout size
-            // of the RecyclerView
-            recyclerView.setHasFixedSize(true);
-            layoutManager = new LinearLayoutManager(this);
-            recyclerView.setLayoutManager(layoutManager);
-            String[] fields = new String[] {ContactsContract.Data.DISPLAY_NAME};
-            ArrayList<String> mArrayList = new ArrayList<String>();
-            int columnIndex=cur.getColumnIndex(ContactsContract.Data.DISPLAY_NAME);
-            while(cur.moveToNext()) {
-                mArrayList.add(cur.getString(columnIndex)); //add the item
+            (new LoadAsync()).execute();
+        }
+
+    }
+
+    private void onSubmit() {
+        if (blockedCaseAndNotEmergencyCase) {
+            //blocked case
+            b_list = makeBlockedList(mAdapter.getCheckedList());
+        } else {
+            //emergency case
+            e_list = makeEmergencyList(mAdapter.getCheckedList());
+        }
+        (new StoreAsync()).execute();
+    }
+
+    private ArrayList<Contact> createList() {
+        ArrayList<Contact> mArrayList = new ArrayList<>();
+        Cursor cursor = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+        while (cursor.moveToNext()) {
+            String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+            String hasPhone = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER));
+            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
+            Log.d("TAG", hasPhone);
+            if (!hasPhone.equals("0")) {
+                // You know it has a number so now query it like this
+                Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
+                while (phones.moveToNext()) {
+                    String phoneNumber = phones.getString(phones.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    mArrayList.add(new Contact(phoneNumber, name));
+//                    Log.d("TAG", "Name:"+name);
+//                    Log.d("TAG", "number:"+phoneNumber);
+                }
+                phones.close();
             }
-            //SimpleCursorRecyclerAdapter adapter =new SimpleCursorRecyclerAdapter(R.layout.activity_get_contact_list,cur,fields,new int[]{R.id.text_list_view});
-               /* new SimpleCursorAdapter(this,
+        }
+        return mArrayList;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (grantResults != null && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            switch (requestCode) {
+                case 100:
+                    createList();
+                    break;
+                default:
+                    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                    break;
+            }
+        }
+
+    }
+
+    /*private void createList1() {
+        Cursor cur = getContacts();
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        // use this setting to
+        // improve performance if you know that changes
+        // in content do not change the layout size
+        // of the RecyclerView
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        String[] fields = new String[]{ContactsContract.Data.DISPLAY_NAME};
+        ArrayList<Contact> mArrayList = new ArrayList<Contact>();
+        int columnIndex_name = cur.getColumnIndex(ContactsContract.Data.DISPLAY_NAME);
+        int columnIndex_id = cur.getColumnIndex(ContactsContract.Data._ID);
+        int columnIndex_phone = cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        int columnIndex_has = cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER);
+        while (cur.moveToNext()) {
+            mArrayList.add(cur.getString(columnIndex_name)); //add the item
+            Log.d("TAG", "_ID" + cur.getString(columnIndex_id));
+//            Log.d("TAG", "Phone"+  cur.getString(columnIndex_phone));
+//            Log.d("TAG", "has phone"+  cur.getString(columnIndex_has));
+        }
+        //SimpleCursorRecyclerAdapter adapter =new SimpleCursorRecyclerAdapter(R.layout.activity_get_contact_list,cur,fields,new int[]{R.id.text_list_view});
+               *//* new SimpleCursorAdapter(this,
                         R.layout.activity_get_contact_list,
                         cur,
                         fields,
-                        new int[] {R.id.text_list_view});*/
-            mAdapter = new RecyclerAdapter(mArrayList);
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.setAdapter(mAdapter);
-        }
-
+                        new int[] {R.id.text_list_view});*//*
+        mAdapter = new RecyclerAdapter(mArrayList);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(mAdapter);
     }
 
     private Cursor getContacts() {
@@ -96,12 +193,193 @@ public class getContactList extends AppCompatActivity {
         Uri uri = ContactsContract.Contacts.CONTENT_URI;
 
         String[] projection =
-                new String[]{ ContactsContract.Contacts._ID,
-                        ContactsContract.Contacts.DISPLAY_NAME };
+                new String[]{ContactsContract.Contacts._ID,
+                        ContactsContract.Contacts.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.HAS_PHONE_NUMBER,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER};
         String selection = null;
         String[] selectionArgs = null;
         String sortOrder = null;
         return getContentResolver().query(uri, projection, selection, selectionArgs, sortOrder);
+    }*/
+
+    private void intentBackToCallingActivity() {
+        Intent intent = new Intent(getContactList.this, SettingsActivity.class);
+        if (blockedCaseAndNotEmergencyCase) {
+            //Block Contacts case
+
+        } else {
+            //Emergency Contacts case
+
+        }
+        startActivity(intent);
+    }
+
+    private ArrayList<BlockedContactDB> makeBlockedList(List<Contact> list) {
+        ArrayList<BlockedContactDB> b_list = new ArrayList<>();
+        for (Contact c : list) {
+            b_list.add(new BlockedContactDB(c.getName(), c.getPhoneNumber()));
+        }
+        return b_list;
+    }
+
+    private ArrayList<EmergencyContactDB> makeEmergencyList(List<Contact> list) {
+        ArrayList<EmergencyContactDB> e_list = new ArrayList<>();
+        for (Contact c : list) {
+            e_list.add(new EmergencyContactDB(c.getName(), c.getPhoneNumber()));
+        }
+        return e_list;
+    }
+
+    private List<Contact> getCheckedList() {
+        List<Contact> checkedList = new ArrayList<>();
+        if (blockedCaseAndNotEmergencyCase) {
+            for (BlockedContactDB b : b_list) {
+                checkedList.add(new Contact(b.phoneNumber, b.contactName));
+            }
+        } else {
+            for (EmergencyContactDB e : e_list) {
+                checkedList.add(new Contact(e.phoneNumber, e.contactName));
+            }
+        }
+        return checkedList;
+    }
+
+    class LoadAsync extends AsyncTask<Void, Void, Void> {
+        ArrayList<Contact> mArrayList = new ArrayList<Contact>();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressLayout.setVisibility(View.VISIBLE);
+            recyclerView = findViewById(R.id.my_recycler_view);
+            // use this setting to
+            // improve performance if you know that changes
+            // in content do not change the layout size
+            // of the RecyclerView
+            recyclerView.setHasFixedSize(true);
+            layoutManager = new LinearLayoutManager(getContactList.this);
+            recyclerView.setLayoutManager(layoutManager);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mAdapter = new RecyclerAdapter(mArrayList);
+            (new LoadCheckedAsync()).execute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mArrayList = createList();
+            return null;
+        }
+    }
+
+    private class StoreAsync extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressLayout.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressLayout.setVisibility(View.GONE);
+            intentBackToCallingActivity();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            initializeDB();
+            updateOrInsert();
+            return null;
+        }
+
+        private void updateOrInsert() {
+            if (blockedCaseAndNotEmergencyCase) {
+                updateOrInsertBlocked();
+            } else {
+                updateOrInsertEmergency();
+            }
+        }
+
+        private void initializeDB() {
+            db = AppDatabase.getAppDatabase(getContactList.this);
+
+        }
+
+        private void updateOrInsertEmergency() {
+            List<EmergencyContactDB> contacts = db.emergencyContactDAO().getAll();
+            if ((contacts != null && contacts.size() > 0)) {
+                for (EmergencyContactDB d : contacts) {
+                    db.emergencyContactDAO().delete(d);
+                }
+            }
+            for (EmergencyContactDB b : e_list) {
+                db.emergencyContactDAO().insertAll(b);
+            }
+        }
+
+        private void updateOrInsertBlocked() {
+            List<BlockedContactDB> contacts = db.blockedContactDAO().getAll();
+            if ((contacts != null && contacts.size() > 0)) {
+                for (BlockedContactDB d : contacts) {
+                    db.blockedContactDAO().delete(d);
+                }
+            }
+            for (BlockedContactDB b : b_list) {
+                db.blockedContactDAO().insertAll(b);
+            }
+        }
+    }
+
+    private class LoadCheckedAsync extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressLayout.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressLayout.setVisibility(View.GONE);
+
+            mAdapter.setCheckedList(getCheckedList());
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setAdapter(mAdapter);
+            progressLayout.setVisibility(View.GONE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            initializeDB();
+            readFromDB();
+            return null;
+        }
+
+        private void initializeDB() {
+            db = AppDatabase.getAppDatabase(getContactList.this);
+        }
+
+        private void readFromDB() {
+            if (blockedCaseAndNotEmergencyCase) {
+                readFromBlocked();
+            } else {
+                readFromEmergency();
+            }
+        }
+
+        private void readFromBlocked() {
+            b_list = db.blockedContactDAO().getAll();
+        }
+
+        private void readFromEmergency() {
+            e_list = db.emergencyContactDAO().getAll();
+        }
+
     }
 
 

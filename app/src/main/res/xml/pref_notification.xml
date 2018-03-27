@@ -8,7 +8,11 @@
     <Preference
         android:summary="Friends you would want to be notified when drunk"
         android:title="Emergency Contacts">
-        <intent android:action="com.monisha.samples.sloshed.activities" />
+        <intent android:action="com.monisha.samples.sloshed.activities">
+            <extra
+                android:name="case"
+                android:value="emergency" />
+        </intent>
     </Preference>
 
 

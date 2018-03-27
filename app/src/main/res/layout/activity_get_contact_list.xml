@@ -9,15 +9,15 @@
         android:id="@+id/my_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="vertical"
         android:layout_marginBottom="70dp"
+        android:scrollbars="vertical"
         />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="70dp"
-        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
         android:layout_weight='1'
-        android:layout_alignParentBottom="true">
+        android:orientation="horizontal">
     <Button
         android:id="@+id/cancel_btn"
         android:layout_width="0dp"
@@ -37,4 +37,15 @@
         android:text="Submit" />
     </LinearLayout>
 
+    <RelativeLayout
+        android:id="@+id/progressbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
 </RelativeLayout>

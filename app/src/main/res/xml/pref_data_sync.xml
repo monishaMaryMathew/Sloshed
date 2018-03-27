@@ -29,7 +29,11 @@
     <Preference
         android:summary="Contacts you want to don't want to drunk dial"
         android:title="Block contacts">
-        <intent android:action="com.monisha.samples.sloshed.activities" />
+        <intent android:action="com.monisha.samples.sloshed.activities">
+            <extra
+                android:name="case"
+                android:value="blocked" />
+        </intent>
     </Preference>
 
 

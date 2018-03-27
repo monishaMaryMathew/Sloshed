@@ -1,13 +1,17 @@
 package com.monisha.samples.sloshed.util;
 
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.models.Contact;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,26 +20,15 @@ import java.util.List;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>{
 
-    private List<String> values;
+    private List<Contact> values;
+    private List<Contact> checkedList = new ArrayList<>();
 
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
-        public TextView txtHeader;
-     //   public Tex txtFooter;
-        public View layout;
-
-        public ViewHolder(View v) {
-            super(v);
-            layout = v;
-            txtHeader = (TextView) v.findViewById(R.id.firstLine);
-           // txtFooter = (TextView) v.findViewById(R.id.secondLine);
-        }
+    // Provide a suitable constructor (depends on the kind of dataset)
+    public RecyclerAdapter(List<Contact> myDataset) {
+        values = myDataset;
     }
 
-    public void add(int position, String item) {
+    public void add(int position, Contact item) {
         values.add(position, item);
         notifyItemInserted(position);
     }
@@ -43,11 +36,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void remove(int position) {
         values.remove(position);
         notifyItemRemoved(position);
-    }
-
-    // Provide a suitable constructor (depends on the kind of dataset)
-    public RecyclerAdapter(List<String> myDataset) {
-        values = myDataset;
     }
 
     // Create new views (invoked by the layout manager)
@@ -69,15 +57,31 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public void onBindViewHolder(ViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        final String name = values.get(position);
+        final String name = values.get(position).getName();
         holder.txtHeader.setText(name);
         holder.txtHeader.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                remove(position);
+                // remove(position);
             }
         });
 
+        holder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b && !checkedList.contains(values.get(position))) {
+                    checkedList.add(values.get(position));
+                } else if (!b && checkedList.contains(values.get(position))) {
+                    checkedList.remove(values.get(position));
+                }
+            }
+        });
+        Contact curr = values.get(position);
+        if (checkedList.contains(curr)) {
+            holder.checkBox.setChecked(true);
+        } else {
+            holder.checkBox.setChecked(false);
+        }
        // holder.txtFooter.setText("Footer: " + name);
     }
 
@@ -85,5 +89,32 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     @Override
     public int getItemCount() {
         return values.size();
+    }
+
+    public List<Contact> getCheckedList() {
+        return checkedList;
+    }
+
+    public void setCheckedList(List<Contact> list) {
+        this.checkedList = list;
+    }
+
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        // each data item is just a string in this case
+        public TextView txtHeader;
+        public AppCompatCheckBox checkBox;
+        //   public Tex txtFooter;
+        public View layout;
+
+        public ViewHolder(View v) {
+            super(v);
+            layout = v;
+            txtHeader = v.findViewById(R.id.firstLine);
+            checkBox = v.findViewById(R.id.checkbox);
+            // txtFooter = (TextView) v.findViewById(R.id.secondLine);
+        }
     }
 }
