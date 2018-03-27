@@ -19,11 +19,11 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.adapters.ContactsRecyclerAdapter;
 import com.monisha.samples.sloshed.dbmodels.BlockedContactDB;
 import com.monisha.samples.sloshed.dbmodels.EmergencyContactDB;
 import com.monisha.samples.sloshed.models.Contact;
 import com.monisha.samples.sloshed.util.AppDatabase;
-import com.monisha.samples.sloshed.util.RecyclerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class getContactList extends AppCompatActivity {
     private Activity context;
     //RecyclerView recyclerView;
     private RecyclerView recyclerView;
-    private RecyclerAdapter mAdapter;
+    private ContactsRecyclerAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private Button cancelBtn, submitBtn;
     private boolean blockedCaseAndNotEmergencyCase = false;
@@ -182,7 +182,7 @@ public class getContactList extends AppCompatActivity {
                         cur,
                         fields,
                         new int[] {R.id.text_list_view});*//*
-        mAdapter = new RecyclerAdapter(mArrayList);
+        mAdapter = new ContactsRecyclerAdapter(mArrayList);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mAdapter);
     }
@@ -264,7 +264,7 @@ public class getContactList extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            mAdapter = new RecyclerAdapter(mArrayList);
+            mAdapter = new ContactsRecyclerAdapter(mArrayList);
             (new LoadCheckedAsync()).execute();
         }
 

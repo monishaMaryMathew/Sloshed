@@ -1,4 +1,4 @@
-package com.monisha.samples.sloshed.util;
+package com.monisha.samples.sloshed.adapters;
 
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.RecyclerView;
@@ -18,13 +18,13 @@ import java.util.List;
  * Created by vazra on 3/25/2018.
  */
 
-public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder>{
+public class ContactsRecyclerAdapter extends RecyclerView.Adapter<ContactsRecyclerAdapter.ViewHolder> {
 
     private List<Contact> values;
     private List<Contact> checkedList = new ArrayList<>();
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public RecyclerAdapter(List<Contact> myDataset) {
+    public ContactsRecyclerAdapter(List<Contact> myDataset) {
         values = myDataset;
     }
 
@@ -40,8 +40,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     // Create new views (invoked by the layout manager)
     @Override
-    public RecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                   int viewType) {
+    public ContactsRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                                 int viewType) {
         // create a new view
         LayoutInflater inflater = LayoutInflater.from(
                 parent.getContext());
