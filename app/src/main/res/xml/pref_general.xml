@@ -9,7 +9,7 @@
         android:singleLine="true"
         android:title="@string/pref_title_display_name" />
     <ListPreference
-        android:defaultValue="1"
+        android:defaultValue="Female"
         android:entries="@array/list_gender_values"
         android:entryValues="@array/list_gender_values"
         android:key="list_preference_gender"
@@ -32,9 +32,9 @@
     <!--android:defaultValue="21"-->
 
     <ListPreference
-        android:defaultValue="3"
+        android:defaultValue="90"
         android:entries="@array/list_weight_values"
-        android:entryValues="@array/list_weight_values"
+        android:entryValues="@array/list_weight_values_number"
         android:key="list_preference_weight"
         android:title="Weight" />
 

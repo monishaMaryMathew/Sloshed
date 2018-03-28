@@ -12,10 +12,12 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.SwitchPreference;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.NumberPicker;
 import android.widget.Toast;
 
 import com.monisha.samples.sloshed.R;
@@ -48,6 +50,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     private static UserDB userDBobj = new UserDB();
     private static DBUserASyncTask DBtaskObj;
     private static DBUserASyncTask2 DBtaskObj2;
+
+
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
@@ -104,7 +108,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             if (preference.getKey().equals("list_preference_gender")) {
                 userDBobj.setGender(stringValue);
             } else if (preference.getKey().equals("list_preference_weight")) {
-                userDBobj.setWeight(Float.parseFloat(stringValue));
+                ListPreference listPreference1 = (ListPreference) preference;
+                int pos = -1;
+                if (value != null && listPreference1.getEntries() != null) {
+                    for (int i = listPreference1.getEntries().length - 1; i >= 0; i--) {
+                        if (listPreference1.getEntries()[i].equals(value)) {
+                            pos = i;
+                            break;
+                        }
+                    }
+                }
+                if (pos != -1)
+                    userDBobj.setWeight(Float.parseFloat((listPreference1.getEntryValues()[pos]).toString()));
             } else if (preference.getKey().equals("list_preference_age123")) {
                 userDBobj.setAge(Integer.parseInt(stringValue));
             } else if (preference.getKey().equals("edit_text_preference_address")) {
@@ -113,11 +128,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 userDBobj.setZipCode(stringValue);
             } else if (preference.getKey().equals("edit_text_preference_drunk_message")) {
                 userDBobj.setMessage(stringValue);
-            } else if (preference.getKey().equals("switch_preference_shareBAC")) {
-                if (stringValue.equals("true")) {
-                    userDBobj.setIsBacAllowed(1);
-                } else
-                    userDBobj.setIsBacAllowed(0);
             } else if (preference.getKey().equals("edit_text_preference_ThresholdBAC")) {
                 userDBobj.setBacThreshold(Float.parseFloat(stringValue));
             } else if (preference.getKey().equals("list_preference_block_time")) {
@@ -130,6 +140,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return true;
         }
     };
+
     private AppDatabase db;
 
     /**
@@ -156,6 +167,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         // Trigger the listener immediately with the preference's
         // current value.
+//        if (preference.getKey().equals("switch_preference_shareBAC")) {
+//            if (preferenc.equals("true")) {
+//                userDBobj.setIsBacAllowed(1);
+//            } else
+//                userDBobj.setIsBacAllowed(0);
+//        }
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
@@ -239,14 +256,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
 
-
         private static final String PREFERENCE_NS =
                 "http://schemas.android.com/apk/res/com.mnm.seekbarpreference";
         private static final String ANDROID_NS = "http://schemas.android.com/apk/res/android";
-
         private static final String ATTR_DEFAULT_VALUE = "defaultValue";
         private static final String ATTR_MIN_VALUE = "minValue";
         private static final String ATTR_MAX_VALUE = "maxValue";
+        private NumberPickerPreference numPickAgeObj;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -263,16 +279,25 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             //bindPreferenceSummaryToValue(findPreference("list_preference_age123"));
             bindPreferenceSummaryToValue(findPreference("edit_text_preference_address"));
             bindPreferenceSummaryToValue(findPreference("edit_text_preference_address_zip"));
+            bindPreferenceSummaryToValue(findPreference("list_preference_weight"));
             //bindPreferenceSummaryToValue(findPreference("seekbar_age"));
-            final NumberPickerPreference numPickAgeObj = (NumberPickerPreference) findPreference("list_preference_age123");
-            numPickAgeObj.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            numPickAgeObj = (NumberPickerPreference) findPreference("list_preference_age123");
 
+            numPickAgeObj.picker.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
                 @Override
-                public boolean onPreferenceChange(Preference preference, Object o) {
-                    userDBobj.setAge(numPickAgeObj.getValue());
-                    return false;
+                public void onValueChange(NumberPicker numberPicker, int i, int i1) {
+                    userDBobj.setAge(numPickAgeObj.getValueCustom());
                 }
             });
+
+//            numPickAgeObj.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+//
+//                @Override
+//                public boolean onPreferenceChange(Preference preference, Object o) {
+//                    userDBobj.setAge(numPickAgeObj.getValueCustom());
+//                    return false;
+//                }
+//            });
         }
 
         @Override
@@ -292,6 +317,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class NotificationPreferenceFragment extends PreferenceFragment {
+        SwitchPreference shareBACBool;
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -304,6 +330,24 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
 //            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
             bindPreferenceSummaryToValue(findPreference("edit_text_preference_drunk_message"));
+            //bindPreferenceSummaryToValue(findPreference("switch_preference_shareBAC"));
+            bindPreferenceSummaryToValue(findPreference("edit_text_preference_ThresholdBAC"));
+
+            shareBACBool = (SwitchPreference) findPreference("switch_preference_shareBAC");
+
+            shareBACBool.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object o) {
+
+                    if (shareBACBool.getSharedPreferences().getBoolean("switch_preference_shareBAC", true)) {
+                        userDBobj.setIsBacAllowed(1);
+                    } else {
+                        userDBobj.setIsBacAllowed(0);
+                    }
+                    return false;
+                }
+            });
+
         }
 
         @Override
@@ -393,7 +437,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 Log.d("TAG", "Updated user");
             }
         }
-
     }
 
     private class DBUserASyncTask2 extends AsyncTask<Void, Void, Void> {
