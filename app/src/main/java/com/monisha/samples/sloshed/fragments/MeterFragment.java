@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,6 +45,7 @@ import com.monisha.samples.sloshed.models.User;
 import com.monisha.samples.sloshed.util.AppDatabase;
 import com.monisha.samples.sloshed.util.BlockOutgoing;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -87,7 +89,7 @@ public class MeterFragment extends Fragment {
     private ComponentName component;
     private Switch initiateDrunkModeSwitch;
     private float drinkCount = 0;
-    
+
 
     public MeterFragment() {
         // Required empty public constructor
@@ -120,15 +122,15 @@ public class MeterFragment extends Fragment {
         mGeoDataClient = Places.getGeoDataClient(this.getActivity());
         // Construct a PlaceDetectionClient.
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this.getActivity());
-        MainActivity mainActivity = (MainActivity)getActivity();
+        MainActivity mainActivity = (MainActivity) getActivity();
         User user = mainActivity.user;
         db = AppDatabase.getAppDatabase(getContext());
-        if(user.getBlockedContacts().size()==0 || user.getEmergencyContacts().size()==0){
+        if (user.getBlockedContacts().size() == 0 || user.getEmergencyContacts().size() == 0) {
             //GetBlockedEmergencyContacts blocked = new G {
             AsyncTask task1 = new AsyncTask() {
                 @Override
                 protected Object doInBackground(Object[] objects) {
-                   // AppDatabase db =  AppDatabase.getAppDatabase(getContext());
+                    // AppDatabase db =  AppDatabase.getAppDatabase(getContext());
                     blockedContacts = db.blockedContactDAO().getAll();
                     //emergencyContacts = db.emergencyContactDAO().getAll();
                     return null;
@@ -137,8 +139,8 @@ public class MeterFragment extends Fragment {
                 @Override
                 protected void onPostExecute(Object o) {
 
-                    for(BlockedContactDB emergency: blockedContacts){
-                        Log.d(emergency.getContactName(),emergency.getPhoneNumber());
+                    for (BlockedContactDB emergency : blockedContacts) {
+                        Log.d(emergency.getContactName(), emergency.getPhoneNumber());
                     }
                     super.onPostExecute(o);
                 }
@@ -148,7 +150,7 @@ public class MeterFragment extends Fragment {
             AsyncTask task2 = new AsyncTask() {
                 @Override
                 protected Object doInBackground(Object[] objects) {
-                   // AppDatabase db =  AppDatabase.getAppDatabase(getContext());
+                    // AppDatabase db =  AppDatabase.getAppDatabase(getContext());
                     emergencyContacts = db.emergencyContactDAO().getAll();
                     return null;
                 }
@@ -157,9 +159,8 @@ public class MeterFragment extends Fragment {
                 protected void onPostExecute(Object o) {
 
 
-
-                    for(EmergencyContactDB emergency: emergencyContacts){
-                        Log.d(emergency.getContactName(),emergency.getPhoneNumber());
+                    for (EmergencyContactDB emergency : emergencyContacts) {
+                        Log.d(emergency.getContactName(), emergency.getPhoneNumber());
                     }
                     super.onPostExecute(o);
                 }
@@ -170,9 +171,8 @@ public class MeterFragment extends Fragment {
             //contact.execute();
             task1.execute();
             task2.execute();
-        }
-        else{
-            blockedContacts= user.getBlockedContacts();
+        } else {
+            blockedContacts = user.getBlockedContacts();
             emergencyContacts = user.getEmergencyContacts();
         }
 
@@ -305,10 +305,13 @@ public class MeterFragment extends Fragment {
 
                     // get phone number from bundle
                     String phoneNumber = intent.getExtras().getString(INTENT_PHONE_NUMBER);
-                  //for(BlockedContactDB block: BlockedContacts) {
-                     // Log.d(block.getContactName(),block.getPhoneNumber());
-                    for(BlockedContactDB block:blockedContacts) {
-                        if ((phoneNumber != null) && phoneNumber.trim().equals(block.getPhoneNumber().trim())) {
+                   // Log.d("phoneNumber",phoneNumber);
+                    //for(BlockedContactDB block: BlockedContacts) {
+                    // Log.d(block.getContactName(),block.getPhoneNumber());
+                    for (BlockedContactDB block : blockedContacts) {
+                       // Log.d(block.getContactName(), PhoneNumberUtils.normalizeNumber(block.getPhoneNumber()));
+                        if ((phoneNumber != null) && phoneNumber.trim().equals(PhoneNumberUtils.normalizeNumber(block.getPhoneNumber()))) {
+                            Log.d(block.getContactName(),block.getPhoneNumber());
                             setResultData(null);
                             makeText(context, "Outgoing Call Blocked", LENGTH_SHORT).show();
                             //}
@@ -350,10 +353,10 @@ public class MeterFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
 
-                        getContext().registerReceiver(blockCall,intentFilter);
-                      // getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_ENABLED , PackageManager.DONT_KILL_APP);
+                        getContext().registerReceiver(blockCall, intentFilter);
+                        // getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_ENABLED , PackageManager.DONT_KILL_APP);
                         isRegistered = true;
-                        makeText(getContext(),"You will not be able to call the contacts you have blocked", LENGTH_LONG).show();
+                        makeText(getContext(), "You will not be able to call the contacts you have blocked", LENGTH_LONG).show();
                         Handler mHandler = new Handler();
                         mHandler.postDelayed(new Runnable() {
 
@@ -363,7 +366,7 @@ public class MeterFragment extends Fragment {
                                     getContext().unregisterReceiver(blockCall);
                                     isRegistered = false;
                                 }
-                                makeText(getContext(),"unblocking", LENGTH_LONG).show();
+                                makeText(getContext(), "unblocking", LENGTH_LONG).show();
                             }
 
                         }, 60000L);
@@ -445,7 +448,7 @@ public class MeterFragment extends Fragment {
                 // app-defined int constant. The callback method gets the
                 // result of the request.
             }
-        }else {
+        } else {
 
             Task<PlaceLikelihoodBufferResponse> placeResult = mPlaceDetectionClient.getCurrentPlace(null);
             placeResult.addOnCompleteListener(new OnCompleteListener<PlaceLikelihoodBufferResponse>() {
@@ -458,15 +461,15 @@ public class MeterFragment extends Fragment {
                         Log.i("lo", String.format("Place '%s' has likelihood: %g",
                                 placeLikelihood.getPlace().getName(),
                                 placeLikelihood.getLikelihood()));
-                        if(placeLikelihood.getLikelihood()>0.10) {
-                            myLoc.append("Location Name: ").append(placeLikelihood.getPlace().getName().toString()+" ").append(", Location Address: ").append(placeLikelihood.getPlace().getAddress().toString()).append(" ");
+                        if (placeLikelihood.getLikelihood() > 0.10) {
+                            myLoc.append("Location Name: ").append(placeLikelihood.getPlace().getName().toString() + " ").append(", Location Address: ").append(placeLikelihood.getPlace().getAddress().toString()).append(" ");
                         }
 
                     }
                     likelyPlaces.release();
-                    for(EmergencyContactDB emergencyContact:emergencyContacts) {
-                        Log.d("test",emergencyContact.getPhoneNumber());
-                        makeText(getContext(),"Sending message to:"+emergencyContact.getPhoneNumber(), LENGTH_SHORT).show();
+                    for (EmergencyContactDB emergencyContact : emergencyContacts) {
+                        Log.d("test", emergencyContact.getPhoneNumber());
+                        makeText(getContext(), "Sending message to:" + emergencyContact.getPhoneNumber(), LENGTH_SHORT).show();
                         sendSMS(emergencyContact.getPhoneNumber(), "I need HELP!.I am currently around these locations:" + myLoc.toString());
                     }
 
@@ -476,15 +479,22 @@ public class MeterFragment extends Fragment {
     }
 
     private void sendSMS(String phoneNumber, String message) {
-        SmsManager sms = SmsManager.getDefault();
-        PendingIntent sentPI;
+
         String SENT = "SMS_SENT";
+        String DELIVERED = "SMS_DELIVERED";
 
-        sentPI = PendingIntent.getBroadcast(getContext(), 0,new Intent(SENT), 0);
+        SmsManager sms = SmsManager.getDefault();
+        PendingIntent deliveredPI = PendingIntent.getBroadcast(getContext(), 0, new Intent(DELIVERED), 0);
+        PendingIntent sentPI = PendingIntent.getBroadcast(getContext(), 0, new Intent(SENT), 0);
+        ArrayList<String> parts = sms.divideMessage(message);
 
-        //sms.sendTextMessage(phoneNumber, null, message, sentPI, null);
-        //SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phoneNumber, null, message, null, null);
+        ArrayList<PendingIntent> sendList = new ArrayList<>();
+        sendList.add(sentPI);
+
+        ArrayList<PendingIntent> deliverList = new ArrayList<>();
+        deliverList.add(deliveredPI);
+
+        sms.sendMultipartTextMessage(phoneNumber, null, parts, sendList, deliverList);
     }
 
     /**
