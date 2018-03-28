@@ -46,11 +46,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      * to reflect its new value.
      */
 
-
+    private static boolean isSaving = false;
+    private static boolean isSaved = true;
+    private static boolean isHeader = false;
     private static UserDB userDBobj = new UserDB();
-    private static DBUserASyncTask DBtaskObj;
-    private static DBUserASyncTask2 DBtaskObj2;
-
 
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
@@ -107,6 +106,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             if (preference.getKey().equals("list_preference_gender")) {
                 userDBobj.setGender(stringValue);
+                isSaved = false;
             } else if (preference.getKey().equals("list_preference_weight")) {
                 ListPreference listPreference1 = (ListPreference) preference;
                 int pos = -1;
@@ -120,18 +120,25 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
                 if (pos != -1)
                     userDBobj.setWeight(Float.parseFloat((listPreference1.getEntryValues()[pos]).toString()));
+                isSaved = false;
             } else if (preference.getKey().equals("list_preference_age123")) {
                 userDBobj.setAge(Integer.parseInt(stringValue));
+                isSaved = false;
             } else if (preference.getKey().equals("edit_text_preference_address")) {
                 userDBobj.setAddressLine1(stringValue);
+                isSaved = false;
             } else if (preference.getKey().equals("edit_text_preference_address_zip")) {
                 userDBobj.setZipCode(stringValue);
+                isSaved = false;
             } else if (preference.getKey().equals("edit_text_preference_drunk_message")) {
                 userDBobj.setMessage(stringValue);
+                isSaved = false;
             } else if (preference.getKey().equals("edit_text_preference_ThresholdBAC")) {
                 userDBobj.setBacThreshold(Float.parseFloat(stringValue));
+                isSaved = false;
             } else if (preference.getKey().equals("list_preference_block_time")) {
                 userDBobj.setBlockedForHour(Integer.parseInt(stringValue));
+                isSaved = false;
             } else {
             }
 
@@ -234,6 +241,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
         loadHeadersFromResource(R.xml.pref_headers, target);
+        isHeader = true;
     }
 
     /**
@@ -248,6 +256,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (isSaving) {
+            Toast.makeText(this, "We need a couple of moments to save data", Toast.LENGTH_SHORT).show();
+        } else if (isHeader && !isSaved) {
+            (new DBUserASyncTask()).execute();
+        } else if (isHeader) {
+            startActivity(new Intent(this, MainActivity.class));
+        } else {
+            Toast.makeText(this, "Please use to the top arrow on this screen", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     /**
      * This fragment shows general preferences only. It is used when the
@@ -263,6 +283,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         private static final String ATTR_MIN_VALUE = "minValue";
         private static final String ATTR_MAX_VALUE = "maxValue";
         private NumberPickerPreference numPickAgeObj;
+
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+            isHeader = false;
+        }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -287,6 +313,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public void onValueChange(NumberPicker numberPicker, int i, int i1) {
                     userDBobj.setAge(numPickAgeObj.getValueCustom());
+                    isSaved = false;
                 }
             });
 
@@ -309,6 +336,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            isHeader = true;
+        }
     }
 
     /**
@@ -318,6 +351,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class NotificationPreferenceFragment extends PreferenceFragment {
         SwitchPreference shareBACBool;
+
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+            isHeader = false;
+        }
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -344,6 +383,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     } else {
                         userDBobj.setIsBacAllowed(0);
                     }
+                    isSaved = false;
                     return false;
                 }
             });
@@ -359,7 +399,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            isHeader = true;
+        }
     }
+
+    // Database connection ke lie
 
     /**
      * This fragment shows data and sync preferences only. It is used when the
@@ -367,6 +415,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class DataSyncPreferenceFragment extends PreferenceFragment {
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+            isHeader = false;
+        }
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -390,24 +443,26 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            isHeader = true;
+        }
     }
 
-    // Database connection ke lie
-
-
-//    @Override
-//    public void onBackPressed() {
-//
-//        Log.d("TAG", " Backpressed ");
-//
-//        super.onBackPressed();
-//    }
-
     private class DBUserASyncTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            isSaving = true;
+        }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Toast.makeText(SettingsActivity.this, "done!", Toast.LENGTH_LONG).show();
+            Toast.makeText(SettingsActivity.this, "Saved changes successfully!", Toast.LENGTH_SHORT).show();
+            isSaved = true;
+            isSaving = false;
             super.onPostExecute(aVoid);
         }
 
@@ -443,7 +498,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            Toast.makeText(SettingsActivity.this, "done", Toast.LENGTH_LONG).show();
+            Toast.makeText(SettingsActivity.this, "Loaded data from storage", Toast.LENGTH_SHORT).show();
             super.onPostExecute(aVoid);
         }
 
