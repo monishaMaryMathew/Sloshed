@@ -100,7 +100,7 @@ public class TipsFragment extends Fragment {
     public void onButtonPressed(Uri uri)
     {
         if (mListener != null) {
-            mListener.onDashboardFragmentInteraction(uri);
+            mListener.onTipsFragmentInteraction(uri);
         }
     }
 
@@ -233,7 +233,7 @@ public class TipsFragment extends Fragment {
     public interface OnFragmentInteractionListener
     {
         // TODO: Update argument type and name
-        void onDashboardFragmentInteraction(Uri uri);
+        void onTipsFragmentInteraction(Uri uri);
     }
 }
 

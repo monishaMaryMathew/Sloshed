@@ -44,6 +44,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements
         CheckRateFragment.OnFragmentInteractionListener,
         DashboardFragment.OnFragmentInteractionListener,
+        TipsFragment.OnFragmentInteractionListener,
         StartNightFragment.OnFragmentInteractionListener,
         MealFragment.OnFragmentInteractionListener,
         MeterFragment.OnFragmentInteractionListener,
@@ -272,6 +273,11 @@ public class MainActivity extends AppCompatActivity implements
                 .setCancelable(true);
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    @Override
+    public void onTipsFragmentInteraction(Uri uri) {
+
     }
 
     class LoadUserDBTask extends AsyncTask<Void, Void, Void> {
