@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -107,24 +108,56 @@ public class DashboardFragment extends Fragment {
         //leftAxis.addLimitLine(line);
 //        barChart.setDescription("The expenses chart.");
         //barChart.animateY(2000);
+        AsyncTask task1 = new AsyncTask()
+        {
+            final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
+            final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
+            @Override
+            protected Object doInBackground(Object[] objects)
+            {
+                Calendar c = Calendar.getInstance();
+                while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY)
+                    c.add(Calendar.DATE,-1);
+                Date startDate = c.getTime();
+                c = Calendar.getInstance();
+                while(c.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
+                    c.add(Calendar.DATE,1);
+                Date endDate = c.getTime();
+                drinksData = db.drinkDAO().getAll();//getForStartEnd(startDate, endDate);
+                Log.d("doinbackground","size:" + drinksData.size());
+                //emergencyContacts = db.emergencyContactDAO().getAll();
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Object o)
+            {
+
+                Log.d("onPostExecute","after");
+                super.onPostExecute(o);
+            }
+        };
         DbWorkAsyncTask task = new DbWorkAsyncTask();
-        GetData taskget = new GetData();
         try
         {
             task.execute().get();
+            task1.execute().get();
         }
         catch (Exception e)
         {
 
         }
-
-        taskget.execute();
-        //AsyncTask task1 = new AsyncTask()
+        for (DrinkDB drink:drinksData)
         {
+            yVals.add(new BarEntry(drink.drinkCount,drink.drinkCount));
+        }
+        BarDataSet dataSet = new BarDataSet(yVals, "Drinks count");
+        dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+        BarData data = new BarData(dataSet);
+        barChart.setData(data);
+        //taskget.execute(); // set the data and list of lables into chart
 
-
-        }; // set the data and list of lables into chart
-
+        Log.d("vals","size="+yVals.size());
         return view;//inflater.inflate(R.layout.fragment_dashboard, container, false);
     }
 
@@ -134,42 +167,7 @@ public class DashboardFragment extends Fragment {
             mListener.onSettingsFragmentInteraction(uri);
         }
     }
-    private class GetData extends AsyncTask<Void, Void, Void>
-    {
-        final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
-        final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
-        @Override
-        protected Void doInBackground(Void... voids)
-        {
-            Calendar c = Calendar.getInstance();
-            while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY)
-                c.add(Calendar.DATE,-1);
-            Date startDate = c.getTime();
-            c = Calendar.getInstance();
-            while(c.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
-                c.add(Calendar.DATE,1);
-            Date endDate = c.getTime();
-            drinksData = db.drinkDAO().getForStartEnd(startDate, endDate);
-            Log.d("doinbackground","size:" + drinksData.size());
-            //emergencyContacts = db.emergencyContactDAO().getAll();
-            return null;
-        }
 
-        @Override
-        protected void onPostExecute(Void aVoid)
-        {
-            for (DrinkDB drink:drinksData)
-            {
-                yVals.add(new BarEntry(drink.drinkCount,drink.drinkCount));
-            }
-            BarDataSet dataSet = new BarDataSet(yVals, "Drinks count");
-            dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
-            BarData data = new BarData(dataSet);
-            barChart.setData(data);
-            Log.d("onPostExecute","after");
-            super.onPostExecute(aVoid);
-        }
-    }
     private class DbWorkAsyncTask extends AsyncTask<Void, Void, Void>
     {
         Date now = new Date();
@@ -208,10 +206,10 @@ public class DashboardFragment extends Fragment {
         }
 
         private void insertToDB(){
-            DrinkDB bc1 = new DrinkDB(6,now,3, now,future,0);
-            //DrinkDB bc2 = new DrinkDB(22,now1,3, now,future,0);
-            //DrinkDB bc3 = new DrinkDB(33,now2,3, now,future,0);
-            //DrinkDB bc4 = new DrinkDB(44,now3,3, now,future,0);
+            DrinkDB bc1 = new DrinkDB((new Random()).nextInt(50),now,3, now,future,0);
+            DrinkDB bc2 = new DrinkDB((new Random()).nextInt(50),now1,3, now,future,0);
+            DrinkDB bc3 = new DrinkDB((new Random()).nextInt(50),now2,3, now,future,0);
+            DrinkDB bc4 = new DrinkDB((new Random()).nextInt(50),now3,3, now,future,0);
             db.drinkDAO().insertAll(bc1);//, bc2, bc3, bc4);
         }
 
