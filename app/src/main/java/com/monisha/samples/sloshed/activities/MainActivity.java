@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     class LoadUserDBTask extends AsyncTask<Void, Void, Void> {
-        UserDB userDBobj = new UserDB();
+        UserDB userDBobj = null;
 
         @Override
         protected void onPreExecute() {
@@ -283,9 +283,12 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(aVoid);
             if (userDBobj != null) {
                 user.setUserFromDB(userDBobj);
+                setProgressLayout(false);
+                (new LoadBlockedDBTask()).execute();
+            } else {
+                createDialog();
             }
-            setProgressLayout(false);
-            (new LoadBlockedDBTask()).execute();
+
         }
 
         @Override
@@ -315,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     class LoadBlockedDBTask extends AsyncTask<Void, Void, Void> {
-        List<BlockedContactDB> blockedDBList = new ArrayList<>();
+        List<BlockedContactDB> blockedDBList = null;
 
         @Override
         protected void onPreExecute() {
@@ -326,9 +329,11 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            user.setBlockedContacts(blockedDBList);
-            setProgressLayout(false);
-            (new LoadEmergencyDBTask()).execute();
+            if (blockedDBList != null && blockedDBList.size() > 0) {
+                user.setBlockedContacts(blockedDBList);
+                setProgressLayout(false);
+                (new LoadEmergencyDBTask()).execute();
+            }
         }
 
         @Override
@@ -359,10 +364,12 @@ public class MainActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            user.setEmergencyContacts(emergencyDBList);
-            setProgressLayout(false);
-            if (user.getWeight() == 0) {
-                createDialog();
+            if (emergencyDBList != null && emergencyDBList.size() > 0) {
+                user.setEmergencyContacts(emergencyDBList);
+                setProgressLayout(false);
+                if (user.getWeight() == 0) {
+                    createDialog();
+                }
             }
         }
 

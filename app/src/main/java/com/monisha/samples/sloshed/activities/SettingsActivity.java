@@ -270,7 +270,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         } else if (isHeader) {
             startActivity(new Intent(this, MainActivity.class));
         } else {
-            Toast.makeText(this, "Please use to the top arrow on this screen", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(this, "Please use to the top arrow on this screen", Toast.LENGTH_SHORT).show();
+            super.onBackPressed();
         }
     }
 
