@@ -1,45 +1,33 @@
 package com.monisha.samples.sloshed.fragments;
 
-import android.Manifest;
-import android.app.ProgressDialog;
+import android.arch.persistence.room.Room;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.Toast;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.*;
+import com.github.mikephil.charting.utils.*;
+import com.github.mikephil.charting.components.*;
+import com.google.api.client.util.DateTime;
 import com.monisha.samples.sloshed.R;
-import com.monisha.samples.sloshed.activities.MainActivity;
-import com.monisha.samples.sloshed.adapters.TipsListAdapter;
-import com.monisha.samples.sloshed.models.Tips;
-import com.monisha.samples.sloshed.util.APICallsUtil;
+import com.monisha.samples.sloshed.dbmodels.DrinkDB;
+import com.monisha.samples.sloshed.util.AppDatabase;
 
-import org.apache.http.client.ClientProtocolException;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
-//TODO
-//import com.monisha.samples.sloshed.adapters.TipsListAdapter;
-//import com.monisha.samples.sloshed.models.Tips;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -50,8 +38,6 @@ import javax.net.ssl.HttpsURLConnection;
  * create an instance of this fragment.
  */
 public class DashboardFragment extends Fragment {
-
-    ListView listView;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -60,11 +46,12 @@ public class DashboardFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
+    View view;
+    AppDatabase db;
+    List<DrinkDB> drinksData;
     private OnFragmentInteractionListener mListener;
-    private static int PERMISSION_REQUEST_INTERNET = 0;
-    public DashboardFragment()
-    {
+
+    public DashboardFragment() {
         // Required empty public constructor
     }
 
@@ -87,8 +74,7 @@ public class DashboardFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState)
-    {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -97,142 +83,226 @@ public class DashboardFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
-        // Inflate the layout for this fragment
-        //setContentView(R.layout.activity_main);
-        View view = inflater.inflate(R.layout.fragment_dashboard, container, false);
-        GetTask runner = new GetTask();
-        runner.execute();
-        listView = (ListView) view.findViewById(R.id.tipsList);
-        return view;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this
+        db = AppDatabase.getAppDatabase(getContext());
+        view =inflater.inflate(R.layout.fragment_dashboard, container, false);
+        final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
+        final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
+        // creating labels
+        ArrayList<String> labels = new ArrayList<String>();
+        labels.add("Monday");
+        labels.add("Tuesday");
+        labels.add("Wednesday");
+        labels.add("Thursday");
+        labels.add("Friday");
+        labels.add("Saturday");
+        labels.add("Sunday");
+
+        //LimitLine line = new LimitLine(12f, "average daily expense");
+        //line.setTextSize(12f);
+        //line.setLineWidth(4f);
+        //YAxis leftAxis = barChart.getAxisLeft();
+        //leftAxis.addLimitLine(line);
+//        barChart.setDescription("The expenses chart.");
+        //barChart.animateY(2000);
+        DbWorkAsyncTask task = new DbWorkAsyncTask();
+        GetData taskget = new GetData();
+        try
+        {
+            task.execute().get();
+        }
+        catch (Exception e)
+        {
+
+        }
+
+        taskget.execute();
+        //AsyncTask task1 = new AsyncTask()
+        {
+
+
+        }; // set the data and list of lables into chart
+
+        return view;//inflater.inflate(R.layout.fragment_dashboard, container, false);
     }
 
-    public void onButtonPressed(Uri uri)
-    {
+    // TODO: Rename method, update argument and hook method into UI event
+    public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onDashboardFragmentInteraction(uri);
+            mListener.onSettingsFragmentInteraction(uri);
         }
     }
-
-    @Override
-    public void onAttach(Context context)
+    private class GetData extends AsyncTask<Void, Void, Void>
     {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener)
+        final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
+        final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
+        @Override
+        protected Void doInBackground(Void... voids)
         {
-            mListener = (OnFragmentInteractionListener) context;
+            Calendar c = Calendar.getInstance();
+            while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY)
+                c.add(Calendar.DATE,-1);
+            Date startDate = c.getTime();
+            c = Calendar.getInstance();
+            while(c.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
+                c.add(Calendar.DATE,1);
+            Date endDate = c.getTime();
+            drinksData = db.drinkDAO().getForStartEnd(startDate, endDate);
+            Log.d("doinbackground","size:" + drinksData.size());
+            //emergencyContacts = db.emergencyContactDAO().getAll();
+            return null;
         }
-        else
+
+        @Override
+        protected void onPostExecute(Void aVoid)
         {
+            for (DrinkDB drink:drinksData)
+            {
+                yVals.add(new BarEntry(drink.drinkCount,drink.drinkCount));
+            }
+            BarDataSet dataSet = new BarDataSet(yVals, "Drinks count");
+            dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+            BarData data = new BarData(dataSet);
+            barChart.setData(data);
+            Log.d("onPostExecute","after");
+            super.onPostExecute(aVoid);
+        }
+    }
+    private class DbWorkAsyncTask extends AsyncTask<Void, Void, Void>
+    {
+        Date now = new Date();
+        Date now1 = new Date(2018,2,27,22,21);
+        Date now2 = new Date(2018,2,27,22,23);
+        Date now3 = new Date(2018,2,27,22,24);
+        Date future = new Date(2018,2,28,22,20);
+        @Override
+        protected Void doInBackground(Void... voids) {
+            initializeDB();
+            getAndDisplayAll();
+            //testInsertUpdate();
+            insertToDB();
+            return null;
+        }
+
+        private void testInsertUpdate() {
+            DrinkDB drinks = new DrinkDB(5,now,3, now,future,0);
+            updateOrInsert(drinks); //needs to insert, since it is the first time
+            getAndDisplayAll();
+
+            drinks.setDrinkCount(2);
+            updateOrInsert(drinks); //needs to update, since it is a new number
+            getAndDisplayAll();
+
+            drinks.setBac(0.04f);
+            updateOrInsert(drinks); //needs to insert, since it is new drinks
+            getAndDisplayAll();
+        }
+
+        private void initializeDB(){
+            db = Room.databaseBuilder(getContext(),
+                    AppDatabase.class, "DrinkDB")
+                    .fallbackToDestructiveMigration()
+                    .build();
+        }
+
+        private void insertToDB(){
+            DrinkDB bc1 = new DrinkDB(6,now,3, now,future,0);
+            //DrinkDB bc2 = new DrinkDB(22,now1,3, now,future,0);
+            //DrinkDB bc3 = new DrinkDB(33,now2,3, now,future,0);
+            //DrinkDB bc4 = new DrinkDB(44,now3,3, now,future,0);
+            db.drinkDAO().insertAll(bc1);//, bc2, bc3, bc4);
+        }
+
+        private void readFromDB(){
+            /*List<DrinkDB> bcs = db.blockedContactDAO().getAll();
+            */
+            List<DrinkDB> bcs = db.drinkDAO().getForStartEnd(now, future);
+            if((bcs==null)||(bcs!=null && bcs.size()==0)){
+                Log.d("TAG", "ouch");
+            }
+            for(DrinkDB bc: bcs){
+                Log.d("TAG", "timestamp:"+bc.timestamp.toString() + "count:" + bc.drinkCount + "timestart:" + bc.start_time + "end:" + bc.end_time + "bac:" + bc.bac);
+            }
+        }
+
+        private void deleteAll(){
+            List<DrinkDB> list = getAndDisplayAll();
+            for (DrinkDB b : list){
+                db.drinkDAO().delete(b);
+            }
+            Log.d("TAG", "deleted all");
+            List<DrinkDB> list1 = getAndDisplayAll();
+        }
+
+        private List<DrinkDB> getAndDisplayAll() {
+            List<DrinkDB> list = db.drinkDAO().getAll();
+            display(list);
+            return list;
+        }
+
+        private void updateOrInsert(DrinkDB contact){
+            DrinkDB contactToBeAdded = contact;
+            List<DrinkDB> contacts = db.drinkDAO().getForThisSession(contactToBeAdded.timestamp);
+            if((contacts==null)||(contacts!=null && contacts.size()==0)){
+                //No such contact already exists in the database
+                db.drinkDAO().insertAll(contactToBeAdded);
+                Log.d("TAG", "Inserted contact");
+            } else {
+                //This contact already exists in the database
+                DrinkDB contactToBeUpdated = contacts.get(0);
+                contactToBeUpdated.setDrinkCount(contactToBeAdded.drinkCount);
+                db.drinkDAO().update(contactToBeUpdated);
+                Log.d("TAG", "Updated contact");
+            }
+        }
+
+        private void display(List<DrinkDB> cs){
+            if((cs==null)||(cs!=null && cs.size()==0)){
+                Log.d("TAG", "ouch");
+            }
+            for(DrinkDB bc: cs){
+                Log.d("TAG", "timestamp:"+bc.timestamp.toString() + "count:" + bc.drinkCount + "timestart:" + bc.start_time + "end:" + bc.end_time + "bac:" + bc.bac);
+            }
+        }
+
+    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
     }
 
     @Override
-    public void onDetach()
-    {
+    public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
-    public class GetTask extends AsyncTask<String, Void, String>
-    {
-        private Exception exception;
-        private static final int REQUEST_INTERNET = 0;
-        private  List<Tips> tipsArray = new ArrayList<Tips>();
-        protected String doInBackground(String... urls)
-        {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.INTERNET)
-                    == PackageManager.PERMISSION_GRANTED)
-            {
-                // Permission is already available
-                try
-                {
-                    String resp = APICallsUtil.getResponse("http://notsloshed-env.us-east-1.elasticbeanstalk.com/tips");
-                        JSONObject jObject = new JSONObject(resp);
-                        JSONArray jArray = jObject.getJSONObject("_embedded").getJSONArray("tips");
-                        for (int i = 0; i < jArray.length(); i++)
-                        {
-                            JSONObject oneObject = jArray.getJSONObject(i);
-                            // Pulling items from the array
-                            String oneObjectsItem = oneObject.getString("tipname");
-                            String oneObjectsItem2 = oneObject.getString("tiplink");
-                            tipsArray.add(new Tips(oneObjectsItem, oneObjectsItem2));
-                        }
-                        // Do normal input or output stream reading
-//                        populateList(tipsArray);
-
-                }
-                catch (Exception e)
-                {
-                    String ex = e.getMessage();
-                }
-            }
-            else
-            {
-                // Permission is missing and must be requested.
-                requestPermission();
-            }
-            return null;
-        }
-
-        private void requestPermission()
-        {
-            // Permission has not been granted and must be requested.
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.INTERNET))
-            {
-                // Request the permission
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.INTERNET}, PERMISSION_REQUEST_INTERNET);
-            }
-            else
-            {
-                // Request the permission. The result will be received in onRequestPermissionResult().
-                ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.INTERNET}, PERMISSION_REQUEST_INTERNET);
-            }
-        }
-
-        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-        {
-            // BEGIN_INCLUDE(onRequestPermissionsResult)
-            if (requestCode == REQUEST_INTERNET)
-            {
-                // Request for camera permission.
-                if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
-                    // Permission has been granted. Start camera preview Activity.
-                    String resp = APICallsUtil.getResponse("http://notsloshed-env.us-east-1.elasticbeanstalk.com/tips");
-                }
-                else
-                {
-                    // Permission request was denied.
-
-                }
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String s)
-        {
-            super.onPostExecute(s);
-            populateList(tipsArray);
-        }
-    }
-
-
-
-    private void populateList(List<Tips> tipsList)
-    {
-        Tips[] tipsArray = tipsList.toArray(new Tips[tipsList.size()]);
-        TipsListAdapter listAdapter = new TipsListAdapter(getActivity(), tipsList.toArray(new Tips[tipsList.size()]));
-        listView.setAdapter(listAdapter);
-    }
-
-    public interface OnFragmentInteractionListener
-    {
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onDashboardFragmentInteraction(Uri uri);
+        void onSettingsFragmentInteraction(Uri uri);
+    }
+
+    private void addData()
+    {
+
+
     }
 }
-

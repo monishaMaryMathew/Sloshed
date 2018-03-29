@@ -26,6 +26,7 @@ import com.monisha.samples.sloshed.dbmodels.UserDB;
 import com.monisha.samples.sloshed.fragments.CabBookingFragment;
 import com.monisha.samples.sloshed.fragments.CheckRateFragment;
 import com.monisha.samples.sloshed.fragments.DashboardFragment;
+import com.monisha.samples.sloshed.fragments.TipsFragment;
 import com.monisha.samples.sloshed.fragments.DrinkSelectionFragment;
 import com.monisha.samples.sloshed.fragments.MealFragment;
 import com.monisha.samples.sloshed.fragments.MeterFragment;
@@ -55,6 +56,10 @@ public class MainActivity extends AppCompatActivity implements
     private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction;
     private StageEnum checkRateStage = StageEnum.START_MY_NIGHT;
+
+    //public Drink previousDrink = null;
+    //public User user = new User();
+
     private int minAfterLastMeal = 0;
     private RelativeLayout progressLayout;
     private AppDatabase db;
@@ -74,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements
                     fragment = new CheckRateFragment().newInstance(checkRateStage);
                     break;
                 case R.id.navigation_settings:
-                    //fragment = new SettingsFragment();
+                    fragment = new TipsFragment();
                     break;
             }
             if(fragment!=null){
@@ -137,10 +142,10 @@ public class MainActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    @Override
-    public void onDashboardFragmentInteraction(Uri uri) {
-
-    }
+//    @Override
+//    public void onDashboardFragmentInteraction(Uri uri) {
+//
+//    }
 
     @Override
     public int onCheckRateFragmentInteractionGetMin() {

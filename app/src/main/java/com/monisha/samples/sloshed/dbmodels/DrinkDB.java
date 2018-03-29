@@ -3,67 +3,69 @@ package com.monisha.samples.sloshed.dbmodels;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+
+import android.arch.persistence.room.TypeConverters;
 import android.support.annotation.NonNull;
+
+import com.monisha.samples.sloshed.util.TimeConverter;
+
+import java.util.Date;
+
 
 /**
  * Created by Monisha on 3/25/2018.
  */
 
 @Entity
-public class DrinkDB {
+public class DrinkDB
+{
+    public DrinkDB(@NonNull int session, @NonNull Date timestamp, float drinkCount, Date start_time, Date end_time, float bac) {
+        this.session = session;
+        this.timestamp = timestamp;
+        this.drinkCount = drinkCount;
+        this.start_time = start_time;
+        this.end_time = end_time;
+        this.bac = bac;
+    }
+
     @PrimaryKey
     @NonNull
-    public long timestamp;
+    public int session;
 
-    @ColumnInfo(name = "drink_type")
-    public String drinkType;
-
-    @ColumnInfo(name = "alcohol_percentage")
-    public float alcoholPercentage;
-
-    @ColumnInfo(name = "quantity")
-    public float quantity;
+    @NonNull
+    @TypeConverters({TimeConverter.class})
+    public Date timestamp;
 
     @ColumnInfo(name = "drink_count")
     public float drinkCount;
 
-    @ColumnInfo(name = "day")
-    public String day;
+    @ColumnInfo(name = "start_time")
+    @TypeConverters({TimeConverter.class})
+    public Date start_time;
 
-    @ColumnInfo(name = "day_time")
-    public String dayTime;
+    @ColumnInfo(name = "end_time")
+    @TypeConverters({TimeConverter.class})
+    public Date end_time;
+
+    @ColumnInfo(name = "BAC")
+    public float bac;
 
     @NonNull
-    public long getTimestamp() {
+    public int getSession() {
+        return session;
+    }
+
+    public void setSession(@NonNull int session) {
+        this.session = session;
+    }
+
+    @NonNull
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(@NonNull long timestamp) {
+    public void setTimestamp(@NonNull Date timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public String getDrinkType() {
-        return drinkType;
-    }
-
-    public void setDrinkType(String drinkType) {
-        this.drinkType = drinkType;
-    }
-
-    public float getAlcoholPercentage() {
-        return alcoholPercentage;
-    }
-
-    public void setAlcoholPercentage(float alcoholPercentage) {
-        this.alcoholPercentage = alcoholPercentage;
-    }
-
-    public float getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(float quantity) {
-        this.quantity = quantity;
     }
 
     public float getDrinkCount() {
@@ -74,19 +76,27 @@ public class DrinkDB {
         this.drinkCount = drinkCount;
     }
 
-    public String getDay() {
-        return day;
+    public Date getStart_time() {
+        return start_time;
     }
 
-    public void setDay(String day) {
-        this.day = day;
+    public void setStart_time(Date start_time) {
+        this.start_time = start_time;
     }
 
-    public String getDayTime() {
-        return dayTime;
+    public Date getEnd_time() {
+        return end_time;
     }
 
-    public void setDayTime(String dayTime) {
-        this.dayTime = dayTime;
+    public void setEnd_time(Date end_time) {
+        this.end_time = end_time;
+    }
+
+    public float getBac() {
+        return bac;
+    }
+
+    public void setBac(float bac) {
+        this.bac = bac;
     }
 }

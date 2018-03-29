@@ -31,7 +31,7 @@ public class BlockOutgoing extends BroadcastReceiver {
             makeText(context,"blue"+ABORT_PHONE_NUMBER,Toast.LENGTH_SHORT).show();*/
             if ((phoneNumber != null) && phoneNumber.trim().equals("+13134245612")) {
                  setResultData(null);
-                 Toast.makeText(context, "Outgoing Call Blocke",Toast.LENGTH_SHORT).show();
+                 Toast.makeText(context, "Outgoing Call Blocked",Toast.LENGTH_SHORT).show();
             }
 
         }
