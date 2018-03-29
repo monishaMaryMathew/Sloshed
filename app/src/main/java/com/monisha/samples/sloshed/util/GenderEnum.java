@@ -6,5 +6,6 @@ package com.monisha.samples.sloshed.util;
 
 public enum GenderEnum {
     MALE,
-    FEMALE
+    FEMALE,
+    OTHER
 }

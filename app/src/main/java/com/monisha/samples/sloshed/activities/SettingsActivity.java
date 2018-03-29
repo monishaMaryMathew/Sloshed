@@ -109,7 +109,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 isSaved = false;
             } else if (preference.getKey().equals("list_preference_weight")) {
                 ListPreference listPreference1 = (ListPreference) preference;
-                int pos = -1;
+                /*int pos = -1;
                 if (value != null && listPreference1.getEntries() != null) {
                     for (int i = listPreference1.getEntries().length - 1; i >= 0; i--) {
                         if (listPreference1.getEntries()[i].equals(value)) {
@@ -118,8 +118,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
                     }
                 }
-                if (pos != -1)
+                if (pos != -1) {
                     userDBobj.setWeight(Float.parseFloat((listPreference1.getEntryValues()[pos]).toString()));
+                }*/
+                if (stringValue.length() <= 3) {
+                    userDBobj.setWeight(Float.parseFloat(stringValue));
+                }
                 isSaved = false;
             } else if (preference.getKey().equals("list_preference_age123")) {
                 userDBobj.setAge(Integer.parseInt(stringValue));
@@ -207,8 +211,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
-        //DBtaskObj2 = new DBUserASyncTask2();
+        if (!isSaved) {
+            (new DBUserASyncTask()).execute();
+        }
         (new DBUserASyncTask2()).execute();
         setupActionBar();
     }

@@ -2,6 +2,7 @@ package com.monisha.samples.sloshed.models;
 
 import com.monisha.samples.sloshed.dbmodels.BlockedContactDB;
 import com.monisha.samples.sloshed.dbmodels.EmergencyContactDB;
+import com.monisha.samples.sloshed.dbmodels.UserDB;
 import com.monisha.samples.sloshed.util.GenderEnum;
 
 import java.util.ArrayList;
@@ -254,5 +255,43 @@ public class User {
 
     public void setZipcode(String zipcode) {
         this.zipcode = zipcode;
+    }
+
+    public void setUserFromDB(UserDB userDB) {
+        this.weight = (int) userDB.getWeight();
+        this.age = userDB.getAge();
+        if (userDB.getGender().equals("Male")) {
+            this.genderEnum = GenderEnum.MALE;
+        } else if (userDB.getGender().equals("Female")) {
+            this.genderEnum = GenderEnum.FEMALE;
+        } else if (userDB.getGender().equals("Other")) {
+            this.genderEnum = GenderEnum.OTHER;
+        }
+        //Emergency Contact Info
+        //check if at least one emergency contact information is available
+        this.emergencyContacts = new ArrayList<EmergencyContactDB>();
+        this.blockedContacts = new ArrayList<BlockedContactDB>();
+
+        this.blockedForHours = userDB.getBlockedForHour();
+        this.bacThreshold = userDB.getBacThreshold();
+
+        this.addressLine1 = userDB.getAddressLine1();
+        this.addressLine2 = userDB.getAddressLine2();
+        this.city = userDB.getCity();
+        this.zipcode = userDB.getZipCode();
+
+
+        //TODO Compute the following
+        this.lowLevel = 0;
+        this.mediumLevel = 0;
+        this.lowLevelCount = 0;
+        this.mediumLevelCount = 0;
+
+        computeLevelCounts();
+        computeLevelPercentages();
+
+        //TODO keep updating the following information
+        this.drinksConsumed = new ArrayList<Drink>();
+        this.currentDrinkCount = 0;
     }
 }

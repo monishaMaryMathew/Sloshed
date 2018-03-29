@@ -1,20 +1,28 @@
 package com.monisha.samples.sloshed.activities;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.dbmodels.BlockedContactDB;
+import com.monisha.samples.sloshed.dbmodels.EmergencyContactDB;
+import com.monisha.samples.sloshed.dbmodels.UserDB;
 import com.monisha.samples.sloshed.fragments.CabBookingFragment;
 import com.monisha.samples.sloshed.fragments.CheckRateFragment;
 import com.monisha.samples.sloshed.fragments.DashboardFragment;
@@ -24,14 +32,17 @@ import com.monisha.samples.sloshed.fragments.MeterFragment;
 import com.monisha.samples.sloshed.fragments.StartNightFragment;
 import com.monisha.samples.sloshed.models.Drink;
 import com.monisha.samples.sloshed.models.User;
+import com.monisha.samples.sloshed.util.AppDatabase;
 import com.monisha.samples.sloshed.util.StageEnum;
+
+import java.util.ArrayList;
+import java.util.List;
 
 //import com.monisha.samples.sloshed.fragments.SettingsFragment;
 
 public class MainActivity extends AppCompatActivity implements
         CheckRateFragment.OnFragmentInteractionListener,
         DashboardFragment.OnFragmentInteractionListener,
-        //SettingsFragment.OnFragmentInteractionListener,
         StartNightFragment.OnFragmentInteractionListener,
         MealFragment.OnFragmentInteractionListener,
         MeterFragment.OnFragmentInteractionListener,
@@ -45,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements
     private FragmentTransaction fragmentTransaction;
     private StageEnum checkRateStage = StageEnum.START_MY_NIGHT;
     private int minAfterLastMeal = 0;
+    private RelativeLayout progressLayout;
+    private AppDatabase db;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -102,16 +115,20 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        progressLayout = findViewById(R.id.progressbar_layout_main);
+        setProgressLayout(false);
 
 //        Toolbar myToolbar = (Toolbar) findViewById(R.id.upper_nav_settings);
 //        setSupportActionBar(myToolbar);
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         navigation.setSelectedItemId(R.id.navigation_check_rate);
         fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragment_container, new CheckRateFragment());
         fragmentTransaction.commit();
+
+        (new LoadUserDBTask()).execute();
     }
 
     // @Override
@@ -226,5 +243,142 @@ public class MainActivity extends AppCompatActivity implements
     public void btnOpenSettings_onClick(View view) {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
+    }
+
+    public void setProgressLayout(boolean isSet) {
+        if (isSet) {
+            progressLayout.setVisibility(View.VISIBLE);
+        } else {
+            progressLayout.setVisibility(View.GONE);
+        }
+    }
+
+    private void createDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("Please complete the settings before proceeding")
+                .setTitle("Settings Required")
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                        startActivity(intent);
+                    }
+                })
+                .setCancelable(true);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    class LoadUserDBTask extends AsyncTask<Void, Void, Void> {
+        UserDB userDBobj = new UserDB();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setProgressLayout(true);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (userDBobj != null) {
+                user.setUserFromDB(userDBobj);
+            }
+            setProgressLayout(false);
+            (new LoadBlockedDBTask()).execute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            initialize();
+            readFromDB();
+            return null;
+        }
+
+        private void initialize() {
+            db = AppDatabase.getAppDatabase(MainActivity.this);
+        }
+
+        private void readFromDB() {
+            /*List<BlockedContactDB> bcs = db.blockedContactDAO().getAll();
+            */
+            List<UserDB> bcs = db.userDAO().getAll();
+            if ((bcs == null) || (bcs != null && bcs.size() == 0)) {
+                Log.d("TAG", "ouch");
+            }
+            for (UserDB bc : bcs) {
+                userDBobj = bc;
+                Log.d("TAG", "age:" + bc.age + ", phone:" + bc.weight);
+            }
+
+        }
+    }
+
+    class LoadBlockedDBTask extends AsyncTask<Void, Void, Void> {
+        List<BlockedContactDB> blockedDBList = new ArrayList<>();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setProgressLayout(true);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            user.setBlockedContacts(blockedDBList);
+            setProgressLayout(false);
+            (new LoadEmergencyDBTask()).execute();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            initialize();
+            readFromDB();
+            return null;
+        }
+
+        private void initialize() {
+            db = AppDatabase.getAppDatabase(MainActivity.this);
+        }
+
+        private void readFromDB() {
+            blockedDBList = db.blockedContactDAO().getAll();
+        }
+    }
+
+    class LoadEmergencyDBTask extends AsyncTask<Void, Void, Void> {
+        List<EmergencyContactDB> emergencyDBList = new ArrayList<>();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setProgressLayout(true);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            user.setEmergencyContacts(emergencyDBList);
+            setProgressLayout(false);
+            if (user.getWeight() == 0) {
+                createDialog();
+            }
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            initialize();
+            readFromDB();
+            return null;
+        }
+
+        private void initialize() {
+            db = AppDatabase.getAppDatabase(MainActivity.this);
+        }
+
+        private void readFromDB() {
+            emergencyDBList = db.emergencyContactDAO().getAll();
+        }
     }
 }
