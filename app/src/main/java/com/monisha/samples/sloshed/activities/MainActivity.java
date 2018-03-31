@@ -26,11 +26,11 @@ import com.monisha.samples.sloshed.dbmodels.UserDB;
 import com.monisha.samples.sloshed.fragments.CabBookingFragment;
 import com.monisha.samples.sloshed.fragments.CheckRateFragment;
 import com.monisha.samples.sloshed.fragments.DashboardFragment;
-import com.monisha.samples.sloshed.fragments.TipsFragment;
 import com.monisha.samples.sloshed.fragments.DrinkSelectionFragment;
 import com.monisha.samples.sloshed.fragments.MealFragment;
 import com.monisha.samples.sloshed.fragments.MeterFragment;
 import com.monisha.samples.sloshed.fragments.StartNightFragment;
+import com.monisha.samples.sloshed.fragments.TipsFragment;
 import com.monisha.samples.sloshed.models.Drink;
 import com.monisha.samples.sloshed.models.User;
 import com.monisha.samples.sloshed.util.AppDatabase;
@@ -294,12 +294,11 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(aVoid);
             if (userDBobj != null) {
                 user.setUserFromDB(userDBobj);
-                setProgressLayout(false);
                 (new LoadBlockedDBTask()).execute();
             } else {
                 createDialog();
             }
-
+            setProgressLayout(false);
         }
 
         @Override
@@ -342,9 +341,9 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(aVoid);
             if (blockedDBList != null && blockedDBList.size() > 0) {
                 user.setBlockedContacts(blockedDBList);
-                setProgressLayout(false);
                 (new LoadEmergencyDBTask()).execute();
             }
+            setProgressLayout(false);
         }
 
         @Override
@@ -377,11 +376,11 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(aVoid);
             if (emergencyDBList != null && emergencyDBList.size() > 0) {
                 user.setEmergencyContacts(emergencyDBList);
-                setProgressLayout(false);
                 if (user.getWeight() == 0) {
                     createDialog();
                 }
             }
+            setProgressLayout(false);
         }
 
         @Override
