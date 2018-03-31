@@ -9,11 +9,14 @@ import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.monisha.samples.sloshed.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,7 +61,22 @@ public class ChartAdapter extends ArrayAdapter<BarData>
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         //xAxis.setTypeface(mTfLight);
         xAxis.setDrawGridLines(false);
-
+        final ArrayList<String> labels = new ArrayList<String>();
+        labels.add("Mon");
+        labels.add("Tue");
+        labels.add("Wed");
+        labels.add("Thur");
+        labels.add("Fri");
+        labels.add("Sat");
+        labels.add("Sun");
+//        labels.add("Sun");
+        xAxis.setValueFormatter(new IAxisValueFormatter()
+        {
+            @Override
+            public String getFormattedValue(float value, AxisBase axis) {
+                return labels.get((int) value);
+            }
+        });
         YAxis leftAxis = holder.chart.getAxisLeft();
         //leftAxis.setTypeface(mTfLight);
         leftAxis.setLabelCount(5, false);
@@ -68,10 +86,12 @@ public class ChartAdapter extends ArrayAdapter<BarData>
         //rightAxis.setTypeface(mTfLight);
         rightAxis.setLabelCount(5, false);
         rightAxis.setSpaceTop(15f);
-
+        rightAxis.setDrawGridLines(false);
         // set data
         holder.chart.setData(data);
         holder.chart.setFitBars(true);
+        rightAxis.removeAllLimitLines();
+        rightAxis.setDrawLabels(false);
 
         // do not forget to refresh the chart
 //            holder.chart.invalidate();
@@ -84,7 +104,7 @@ public class ChartAdapter extends ArrayAdapter<BarData>
         left.setSpaceBottom(25f);
         left.setDrawAxisLine(false);
         left.setDrawGridLines(false);
-        left.setDrawZeroLine(true); // draw a zero line
+        left.setDrawZeroLine(false); // draw a zero line
         left.setZeroLineColor(Color.GRAY);
         left.setZeroLineWidth(0.7f);
         holder.chart.getLegend().setEnabled(false);

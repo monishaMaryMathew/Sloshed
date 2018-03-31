@@ -30,6 +30,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -356,25 +357,17 @@ public class DashboardFragment extends Fragment {
 
         }
         // creating labels
-        ArrayList<String> labels = new ArrayList<String>();
-        labels.add("Monday");
-        labels.add("Tuesday");
-        labels.add("Wednesday");
-        labels.add("Thursday");
-        labels.add("Friday");
-        labels.add("Saturday");
-        labels.add("Sunday");
-
-        Map<Date, Integer> dateMap = new TreeMap<Date,Integer>();
+        Map<String, Integer> dateMap = new HashMap<String, Integer>();
         Calendar c = Calendar.getInstance();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         c.setTime(startDate);
-        dateMap.put(startDate,0);
+        dateMap.put(df.format(startDate),0);
         while (((c.getTime()).compareTo(endDate)) == -1)
         {
-            c.add(Calendar.DATE,1);
             if(c.getTime() == endDate)
                 break;
-            dateMap.put(c.getTime(),0);
+            c.add(Calendar.DATE,1);
+            dateMap.put(df.format(c.getTime()),0);
         }
         //TODO Fix this date removal thing
         for (DrinkDB drink:drinksData)
@@ -382,12 +375,22 @@ public class DashboardFragment extends Fragment {
             if(drink.drinkCount > 0)
             {
                 //dateMap.remove(drink.timestamp);
-                dateMap.remove(drink.timestamp);
-                dateMap.put(drink.timestamp, (int)drink.drinkCount);
+                dateMap.remove(drink.timestamp.toString());
+                dateMap.put(df.format(drink.timestamp), (int)drink.drinkCount);
             }
         }
         int ct = 0;
-        Iterator<Map.Entry<Date, Integer>> itr = dateMap.entrySet().iterator();
+        Map<Date, Integer> newDateMap = new TreeMap<>();
+        for(Map.Entry<String, Integer> entry:dateMap.entrySet())
+        {
+            try
+            {
+                newDateMap.put(df.parse(entry.getKey()), entry.getValue());
+            }
+            catch (Exception e)
+            {}
+        }
+        Iterator<Map.Entry<Date, Integer>> itr = newDateMap.entrySet().iterator();
         while (itr.hasNext())
         {
             //DrinkDB drink = drinksData.get(i);
