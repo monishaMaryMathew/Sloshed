@@ -8,10 +8,10 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_margin="50dp"
         android:layout_gravity="center"
-        android:gravity="center">
+        android:layout_margin="50dp"
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ImageView
             android:layout_width="100dp"
@@ -22,17 +22,17 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:gravity="center"
             android:lines="3"
             android:maxLines="3"
-            android:gravity="center"
-            android:layout_marginBottom="30dp"
             android:text="Are you ready for an exciting evening? We'll just help you make it a responsible and safe one too..." />
 
         <Button
             android:id="@+id/start_night_btn"
             android:layout_width="250dp"
             android:layout_height="65dp"
-            android:text="Start Your Night"
-            android:backgroundTint="@color/colorAccent" />
+            android:background="@drawable/gradient_bg_red_purple"
+            android:text="Start Your Night" />
     </LinearLayout>
 </FrameLayout>

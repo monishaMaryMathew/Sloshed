@@ -29,7 +29,7 @@
                     android:layout_height="match_parent"
                     android:layout_margin="3dp"
                     android:layout_weight="1"
-                    android:background="@color/colorRed"
+                    android:background="@drawable/sos_bg"
                     android:gravity="center">
 
                     <ImageView
@@ -54,7 +54,7 @@
                     android:layout_height="match_parent"
                     android:layout_margin="3dp"
                     android:layout_weight="1"
-                    android:background="@color/colorYellow"
+                    android:background="@drawable/drunk_dial_blocker_bg"
                     android:gravity="center">
 
                     <ImageView
@@ -152,7 +152,7 @@
                         android:layout_height="70dp"
                         android:layout_margin="3dp"
                         android:layout_weight="1"
-                        android:background="@color/colorLightBlue"
+                        android:background="@drawable/gradient_bg_red_purple"
                         android:orientation="horizontal">
 
                         <RelativeLayout
@@ -190,7 +190,7 @@
                         android:layout_height="70dp"
                         android:layout_margin="3dp"
                         android:layout_weight="1"
-                        android:background="@color/colorAccent"
+                        android:background="@drawable/gradient_bg_red_purple"
                         android:orientation="horizontal">
 
                         <RelativeLayout
@@ -265,7 +265,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
                 android:layout_margin="6dp"
-                android:background="@color/colorComplementary"
+                android:background="@drawable/gradient_bg_red_purple"
                 android:text="End my Night" />
         </LinearLayout>
     </ScrollView>

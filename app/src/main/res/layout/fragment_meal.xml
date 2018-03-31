@@ -126,10 +126,10 @@
                     android:id="@+id/next_btn"
                     android:layout_width="250dp"
                     android:layout_height="65dp"
-                    android:text="Next"
                     android:layout_below="@id/time_text"
                     android:layout_centerHorizontal="true"
-                    android:backgroundTint="@color/colorAccent" />
+                    android:background="@drawable/gradient_bg_red_purple"
+                    android:text="Next" />
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

@@ -58,8 +58,8 @@
                         android:id="@+id/beer_details"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:orientation="vertical"
-                        android:layout_weight="3">
+                        android:layout_weight="3"
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:id="@+id/beer_percentage_layout"
@@ -77,10 +77,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="5%"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -92,10 +92,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="7%"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                         </LinearLayout>
@@ -104,9 +104,9 @@
                             android:id="@+id/beer_quantity_layout"
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
+                            android:layout_below="@id/beer_percentage_layout"
                             android:layout_weight="1"
-                            android:orientation="horizontal"
-                            android:layout_below="@id/beer_percentage_layout">
+                            android:orientation="horizontal">
 
                             <RelativeLayout
                                 android:id="@+id/beer_12_oz"
@@ -117,10 +117,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="12 fl Oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -132,10 +132,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="16 fl oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -147,10 +147,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="22 fl oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -162,10 +162,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="40 fl oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
                         </LinearLayout>
                     </LinearLayout>
@@ -195,8 +195,8 @@
                         android:id="@+id/wine_details"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:orientation="vertical"
-                        android:layout_weight="3">
+                        android:layout_weight="3"
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:id="@+id/wine_percentage_layout"
@@ -214,10 +214,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="12%"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
                         </LinearLayout>
 
@@ -225,9 +225,9 @@
                             android:id="@+id/wine_quantity_layout"
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
+                            android:layout_below="@id/beer_percentage_layout"
                             android:layout_weight="1"
-                            android:orientation="horizontal"
-                            android:layout_below="@id/beer_percentage_layout">
+                            android:orientation="horizontal">
 
                             <RelativeLayout
                                 android:id="@+id/wine_5_oz"
@@ -238,10 +238,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="5 fl oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -253,10 +253,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="25.36 fl oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
                         </LinearLayout>
                     </LinearLayout>
@@ -286,8 +286,8 @@
                         android:id="@+id/spirits_details"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:orientation="vertical"
-                        android:layout_weight="3">
+                        android:layout_weight="3"
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:id="@+id/spirits_percentage_layout"
@@ -305,10 +305,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="40%"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
                         </LinearLayout>
 
@@ -316,9 +316,9 @@
                             android:id="@+id/spirits_quantity_layout"
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
+                            android:layout_below="@id/beer_percentage_layout"
                             android:layout_weight="1"
-                            android:orientation="horizontal"
-                            android:layout_below="@id/beer_percentage_layout">
+                            android:orientation="horizontal">
 
                             <RelativeLayout
                                 android:id="@+id/spirits_1_oz"
@@ -329,10 +329,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="1.5 fl Oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -344,10 +344,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="6.76 fl oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -359,10 +359,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="12.68 fl oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
 
                             <RelativeLayout
@@ -374,10 +374,10 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_centerInParent="true"
                                     android:text="25.36 fl oz"
-                                    android:textStyle="bold"
                                     android:textSize="14sp"
-                                    android:layout_centerInParent="true" />
+                                    android:textStyle="bold" />
                             </RelativeLayout>
                         </LinearLayout>
                     </LinearLayout>
@@ -389,7 +389,7 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_alignParentBottom="true"
-            android:background="@color/colorWhite"
+            android:background="@color/colorTransparent"
             android:orientation="horizontal">
 
             <Button
@@ -398,7 +398,7 @@
                 android:layout_height="54dp"
                 android:layout_margin="3dp"
                 android:layout_weight="1"
-                android:background="@color/colorGrey"
+                android:background="@drawable/grey_btn_bg"
                 android:text="Cancel" />
 
             <Button
@@ -407,7 +407,7 @@
                 android:layout_height="54dp"
                 android:layout_margin="3dp"
                 android:layout_weight="1"
-                android:background="@color/colorAccent"
+                android:background="@drawable/gradient_bg_red_purple"
                 android:text="Add" />
         </LinearLayout>
     </RelativeLayout>
