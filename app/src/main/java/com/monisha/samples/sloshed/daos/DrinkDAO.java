@@ -21,11 +21,11 @@ public interface DrinkDAO {
     @Query("SELECT * FROM drinkdb")
     List<DrinkDB> getAll();
 
-    @Query("SELECT * FROM drinkdb WHERE start_time>=:startTime AND end_time<=:endTime")
+    @Query("SELECT * FROM drinkdb where timestamp BETWEEN :startTime AND :endTime order by timestamp asc" )
     @TypeConverters({TimeConverter.class})
     List<DrinkDB> getForStartEnd(Date startTime, Date endTime);
 
-    @Query("SELECT * FROM drinkdb WHERE timestamp=:day")
+    @Query("SELECT * FROM drinkdb WHERE timestamp=:day order by timestamp asc")
     @TypeConverters({TimeConverter.class})
     List<DrinkDB> getForThisSession(Date day);
 

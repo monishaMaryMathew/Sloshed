@@ -2,6 +2,7 @@ package com.monisha.samples.sloshed.fragments;
 
 import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,6 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Spinner;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.*;
@@ -17,6 +22,7 @@ import com.github.mikephil.charting.utils.*;
 import com.github.mikephil.charting.components.*;
 import com.google.api.client.util.DateTime;
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.adapters.ChartAdapter;
 import com.monisha.samples.sloshed.dbmodels.DrinkDB;
 import com.monisha.samples.sloshed.util.AppDatabase;
 
@@ -27,8 +33,14 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
+
+import retrofit2.http.GET;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -47,9 +59,12 @@ public class DashboardFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private int flag = 0;
+    private Date startDate, endDate;
     View view;
     AppDatabase db;
     List<DrinkDB> drinksData;
+    final String item = "Weekly";
     private OnFragmentInteractionListener mListener;
 
     public DashboardFragment() {
@@ -85,81 +100,120 @@ public class DashboardFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this
+                             Bundle savedInstanceState)
+    {
         db = AppDatabase.getAppDatabase(getContext());
-        view =inflater.inflate(R.layout.fragment_dashboard, container, false);
-        final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
+        view = inflater.inflate(R.layout.fragment_dashboard, container, false);
+        final Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
+        ListView lv = (ListView) view.findViewById(R.id.listView);
+        final DbWorkAsyncTask task = new DbWorkAsyncTask();
+        ArrayList<BarData> list = new ArrayList<BarData>();
+        ChartAdapter cda = new ChartAdapter(getActivity(), list);
+        final GetTask task1 = new GetTask();
+        //final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
         final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
-        // creating labels
-        ArrayList<String> labels = new ArrayList<String>();
-        labels.add("Monday");
-        labels.add("Tuesday");
-        labels.add("Wednesday");
-        labels.add("Thursday");
-        labels.add("Friday");
-        labels.add("Saturday");
-        labels.add("Sunday");
-
-        //LimitLine line = new LimitLine(12f, "average daily expense");
-        //line.setTextSize(12f);
-        //line.setLineWidth(4f);
-        //YAxis leftAxis = barChart.getAxisLeft();
-        //leftAxis.addLimitLine(line);
-//        barChart.setDescription("The expenses chart.");
-        //barChart.animateY(2000);
-        AsyncTask task1 = new AsyncTask()
+        setStartEndDateForWeek();
+        // Spinner click listener
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
-            final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
-            final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
             @Override
-            protected Object doInBackground(Object[] objects)
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                Calendar c = Calendar.getInstance();
-                while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY)
-                    c.add(Calendar.DATE,-1);
-                Date startDate = c.getTime();
-                c = Calendar.getInstance();
-                while(c.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
-                    c.add(Calendar.DATE,1);
-                Date endDate = c.getTime();
-                drinksData = db.drinkDAO().getAll();//getForStartEnd(startDate, endDate);
-                Log.d("doinbackground","size:" + drinksData.size());
-                //emergencyContacts = db.emergencyContactDAO().getAll();
-                return null;
+                flag = ((String) spinner.getSelectedItem())!= "Weekly View" ? 0:1;
+                try
+                {
+                    task.execute().get();
+                    task1.execute().get();
+                }
+                catch (Exception e)
+                {
+
+                }
             }
 
             @Override
-            protected void onPostExecute(Object o)
+            public void onNothingSelected(AdapterView<?> parent)
             {
-
-                Log.d("onPostExecute","after");
-                super.onPostExecute(o);
+//                try
+//                {
+//                    task.execute().get();
+//                    task1.execute().get();
+//                }
+//                catch (Exception e)
+//                {
+//
+//                }
             }
-        };
-        DbWorkAsyncTask task = new DbWorkAsyncTask();
+        });
         try
         {
             task.execute().get();
-            task1.execute().get();
+//            task1.execute().get();
         }
         catch (Exception e)
         {
 
         }
-        for (DrinkDB drink:drinksData)
-        {
-            yVals.add(new BarEntry(drink.drinkCount,drink.drinkCount));
-        }
-        BarDataSet dataSet = new BarDataSet(yVals, "Drinks count");
-        dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
-        BarData data = new BarData(dataSet);
-        barChart.setData(data);
+        list.add(addData());
+        // Spinner Drop down elements
+        List<String> categories = new ArrayList<String>();
+        categories.add("Weekly View");
+        categories.add("Monthly View");
+
+        // Creating adapter for spinner
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, categories);
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        spinner.setAdapter(dataAdapter);
+        // Inflate the layout for this
+
+        //BarData data = addData();
+        //barChart.setData(data);
+        lv.setAdapter(cda);
         //taskget.execute(); // set the data and list of lables into chart
 
         Log.d("vals","size="+yVals.size());
         return view;//inflater.inflate(R.layout.fragment_dashboard, container, false);
     }
+
+    private void setStartEndDateForWeek()
+    {
+        Calendar c = Calendar.getInstance();
+        while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY)
+            c.add(Calendar.DATE, -1);
+        startDate = c.getTime();
+        c = Calendar.getInstance();
+        while (c.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
+            c.add(Calendar.DATE, 1);
+        endDate = c.getTime();
+    }
+
+    private class GetTask extends AsyncTask<Void, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(Void... voids)
+        {
+            if(flag == 0) {
+//                drinksData = db.drinkDAO().getAll();
+                drinksData = db.drinkDAO().getForStartEnd(startDate, endDate);
+            }
+            else
+                drinksData = db.drinkDAO().getAll();
+            Log.d("doinbackground","size:" + drinksData.size());
+            //emergencyContacts = db.emergencyContactDAO().getAll();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid)
+        {
+            super.onPostExecute(aVoid);
+        }
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -171,16 +225,17 @@ public class DashboardFragment extends Fragment {
     private class DbWorkAsyncTask extends AsyncTask<Void, Void, Void>
     {
         Date now = new Date();
-        Date now1 = new Date(2018,2,27,22,21);
-        Date now2 = new Date(2018,2,27,22,23);
-        Date now3 = new Date(2018,2,27,22,24);
-        Date future = new Date(2018,2,28,22,20);
+        Date now1 = new Date(118,2,25,22,21);
+        Date now2 = new Date(118,2,28,22,23);
+        Date now3 = new Date(118,2,3,22,24);
+        Date future = new Date(118,2,1,22,20);
         @Override
         protected Void doInBackground(Void... voids) {
             initializeDB();
-            getAndDisplayAll();
+            deleteAll();
             //testInsertUpdate();
             insertToDB();
+            getAndDisplayAll();
             return null;
         }
 
@@ -206,11 +261,11 @@ public class DashboardFragment extends Fragment {
         }
 
         private void insertToDB(){
-            DrinkDB bc1 = new DrinkDB((new Random()).nextInt(50),now,3, now,future,0);
-            DrinkDB bc2 = new DrinkDB((new Random()).nextInt(50),now1,3, now,future,0);
-            DrinkDB bc3 = new DrinkDB((new Random()).nextInt(50),now2,3, now,future,0);
-            DrinkDB bc4 = new DrinkDB((new Random()).nextInt(50),now3,3, now,future,0);
-            db.drinkDAO().insertAll(bc1);//, bc2, bc3, bc4);
+            DrinkDB bc1 = new DrinkDB(11,now,3, now,future,0);
+            DrinkDB bc2 = new DrinkDB(22,now1,2, now1,future,0);
+            DrinkDB bc3 = new DrinkDB(33,now2,0, now2,future,0);
+            DrinkDB bc4 = new DrinkDB(44,now3,1, now3,future,0);
+            db.drinkDAO().insertAll(bc1, bc2, bc3, bc4);
         }
 
         private void readFromDB(){
@@ -283,24 +338,69 @@ public class DashboardFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onSettingsFragmentInteraction(Uri uri);
     }
 
-    private void addData()
+    private BarData addData()
     {
+        final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
+        GetTask task = new GetTask();
+        try
+        {
+            task.execute().get();
+        }
+        catch (Exception e)
+        {
 
+        }
+        // creating labels
+        ArrayList<String> labels = new ArrayList<String>();
+        labels.add("Monday");
+        labels.add("Tuesday");
+        labels.add("Wednesday");
+        labels.add("Thursday");
+        labels.add("Friday");
+        labels.add("Saturday");
+        labels.add("Sunday");
 
+        Map<Date, Integer> dateMap = new TreeMap<Date,Integer>();
+        Calendar c = Calendar.getInstance();
+        c.setTime(startDate);
+        dateMap.put(startDate,0);
+        while (((c.getTime()).compareTo(endDate)) == -1)
+        {
+            c.add(Calendar.DATE,1);
+            if(c.getTime() == endDate)
+                break;
+            dateMap.put(c.getTime(),0);
+        }
+        //TODO Fix this date removal thing
+        for (DrinkDB drink:drinksData)
+        {
+            if(drink.drinkCount > 0)
+            {
+                //dateMap.remove(drink.timestamp);
+                dateMap.remove(drink.timestamp);
+                dateMap.put(drink.timestamp, (int)drink.drinkCount);
+            }
+        }
+        int ct = 0;
+        Iterator<Map.Entry<Date, Integer>> itr = dateMap.entrySet().iterator();
+        while (itr.hasNext())
+        {
+            //DrinkDB drink = drinksData.get(i);
+            Map.Entry<Date,Integer> drink = itr.next();
+            yVals.add(new BarEntry(ct,drink.getValue()));
+            ct++;
+        }
+
+        BarDataSet dataSet = new BarDataSet(yVals, "Drinks count");
+        dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+        BarData data = new BarData(dataSet);
+        data.setValueTextSize(13f);
+        data.setBarWidth(0.8f);
+        return data;
     }
 }

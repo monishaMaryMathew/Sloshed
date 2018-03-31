@@ -218,12 +218,12 @@ public class TipsFragment extends Fragment {
         {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-        Tips selectedTip = (Tips)listView.getItemAtPosition(position);
+                Tips selectedTip = (Tips)listView.getItemAtPosition(position);
 //                WebView webView = new WebView(getActivity());
                 //setContentView(webView);
 //                webView.loadUrl(selectedTip.url);
-        Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedTip.url));
-        startActivity(myIntent);
+                Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedTip.url));
+                startActivity(myIntent);
         //return webView;
 
             }
