@@ -96,13 +96,13 @@ public class Drink {
         }
         //Distilled spirits
         else if (alcoholPercentage <= 40) {
-            if (quantity <= 1.5) {
+            if (quantity <= 2/*1.5*/) {
                 drinkCount = 1;
-            } else if (quantity <= 6.76) {//Half pint, 200ml
+            } else if (quantity <= 7/*6.76*/) {//Half pint, 200ml
                 drinkCount = (float) 4.5;
-            } else if (quantity <= 12.68) {//a pint or half bottle, 375ml
+            } else if (quantity <= 13/*12.68*/) {//a pint or half bottle, 375ml
                 drinkCount = (float) 8.5;
-            } else if (quantity <= 25.36) {//a fifth, 750ml
+            } else if (quantity <= 26/*25.36*/) {//a fifth, 750ml
                 drinkCount = 17;
             }
         }
