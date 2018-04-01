@@ -60,7 +60,7 @@ public class ChartAdapter extends ArrayAdapter<BarData>
         Utils.init(getContext());
         // apply styling
         //data.setValueTypeface(mTfLight);
-        data.setValueTextColor(Color.BLACK);
+//        data.setValueTextColor(Color.BLACK);
         holder.chart.getDescription().setEnabled(false);
         holder.chart.setDrawGridBackground(false);
 
@@ -83,20 +83,25 @@ public class ChartAdapter extends ArrayAdapter<BarData>
         {
             for (int i = 0; i <days; i++)
             {
-                labels.add(Integer.toString(i));
+                labels.add(Integer.toString(i+1));
             }
             xAxis.setLabelCount(days, true);
+            xAxis.setTextSize(10f);
 //            holder.chart.setVisibleXRangeMaximum(20);
 //            holder.chart.moveViewToX(10);
         }
-        xAxis.setValueFormatter(new IAxisValueFormatter()
+        if(flag == 0)
         {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis)
+            xAxis.setValueFormatter(new IAxisValueFormatter()
             {
-                return labels.get((int) value);
-            }
-        });
+                @Override
+                public String getFormattedValue(float value, AxisBase axis)
+                {
+                    return labels.get((int) value);
+                }
+            });
+        }
+        xAxis.setTextColor(Color.WHITE);
         data.setValueFormatter(new IValueFormatter()
         {
             @Override
@@ -139,6 +144,8 @@ public class ChartAdapter extends ArrayAdapter<BarData>
         left.setZeroLineColor(Color.GRAY);
 //        left.setZeroLineWidth(0.7f);
         holder.chart.getLegend().setEnabled(false);
+        data.setValueTextColor(Color.WHITE);
+
         holder.chart.setData(data);
         return convertView;
     }
