@@ -19,7 +19,8 @@ import java.util.Date;
 @Entity
 public class DrinkDB
 {
-    public DrinkDB(@NonNull int session, @NonNull Date timestamp, float drinkCount, Date start_time, Date end_time, float bac) {
+    public DrinkDB(@NonNull int session, @NonNull Date timestamp, float drinkCount, Date start_time, Date end_time, float bac)
+    {
         this.session = session;
         this.timestamp = timestamp;
         this.drinkCount = drinkCount;
