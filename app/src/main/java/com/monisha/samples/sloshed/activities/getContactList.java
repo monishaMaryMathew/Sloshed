@@ -169,7 +169,7 @@ public class getContactList extends AppCompatActivity {
         if (grantResults != null && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             switch (requestCode) {
                 case 100:
-                    createList();
+                    (new LoadAsync()).execute();
                     break;
                 default:
                     super.onRequestPermissionsResult(requestCode, permissions, grantResults);
