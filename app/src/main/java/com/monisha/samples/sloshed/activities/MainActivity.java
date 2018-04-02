@@ -532,7 +532,7 @@ public class MainActivity extends AppCompatActivity implements
     }*/
 
     class LoadDrinkDBTask extends AsyncTask<Void, Void, Void> {
-
+        private boolean isContinuation = false;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -544,6 +544,10 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(aVoid);
             if (user.getWeight() == 0) {
                 createDialog();
+            } else if (isContinuation) {
+                //directly move to meter fragment
+                setCheckRateStage(StageEnum.METER);
+                setCheckRateFragment();
             }
             setProgressLayout(false);
         }
@@ -581,15 +585,16 @@ public class MainActivity extends AppCompatActivity implements
             for (DrinkDB entry : entries) {
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    Date d = sdf.parse(entry.getStart_time().toString());
-                    dateTreeMap.put(d, entry);
+                    String d = sdf.format(entry.getStart_time());
+                    Date date = sdf.parse(d);
+                    dateTreeMap.put(date, entry);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
             }//end of for
             //get the latest entry
             if (dateTreeMap.size() > 0) {
-                DrinkDB latestEntry = (DrinkDB) dateTreeMap.lastEntry();
+                DrinkDB latestEntry = dateTreeMap.lastEntry().getValue();
                 try {
                     int latestSession = latestEntry.getSession();
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -601,6 +606,7 @@ public class MainActivity extends AppCompatActivity implements
                         //same day
                         drinkDBObj = latestEntry;
                         user.setCurrentDrinkCount(drinkDBObj.getDrinkCount());
+                        isContinuation = true;
                     } else {
                         //new day
                         createNewDrinkDB(latestSession + 1);
