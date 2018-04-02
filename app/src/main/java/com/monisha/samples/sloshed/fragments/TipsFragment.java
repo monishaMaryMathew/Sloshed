@@ -1,13 +1,13 @@
 package com.monisha.samples.sloshed.fragments;
 
 import android.Manifest;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.view.LayoutInflater;
@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.monisha.samples.sloshed.R;
+import com.monisha.samples.sloshed.activities.MainActivity;
 import com.monisha.samples.sloshed.adapters.TipsListAdapter;
 import com.monisha.samples.sloshed.models.Tips;
 import com.monisha.samples.sloshed.util.APICallsUtil;
@@ -40,18 +41,16 @@ import java.util.List;
  */
 public class TipsFragment extends Fragment {
 
-    ListView listView;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private static int PERMISSION_REQUEST_INTERNET = 0;
+    ListView listView;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
-    private static int PERMISSION_REQUEST_INTERNET = 0;
     public TipsFragment()
     {
         // Required empty public constructor
@@ -93,7 +92,7 @@ public class TipsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_tips, container, false);
         GetTask runner = new GetTask();
         runner.execute();
-        listView = (ListView) view.findViewById(R.id.tipsList);
+        listView = view.findViewById(R.id.tipsList);
         return view;
     }
 
@@ -126,11 +125,41 @@ public class TipsFragment extends Fragment {
         mListener = null;
     }
 
+    private void populateList(List<Tips> tipsList) {
+        Tips[] tipsArray = tipsList.toArray(new Tips[tipsList.size()]);
+        TipsListAdapter listAdapter = new TipsListAdapter(getActivity(), tipsList.toArray(new Tips[tipsList.size()]));
+        listView.setAdapter(listAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Tips selectedTip = (Tips) listView.getItemAtPosition(position);
+//                WebView webView = new WebView(getActivity());
+                //setContentView(webView);
+//                webView.loadUrl(selectedTip.url);
+                Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedTip.url));
+                startActivity(myIntent);
+                //return webView;
+
+            }
+        });
+    }
+
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onTipsFragmentInteraction(Uri uri);
+    }
+
     public class GetTask extends AsyncTask<String, Void, String>
     {
-        private Exception exception;
         private static final int REQUEST_INTERNET = 0;
+        private Exception exception;
         private  List<Tips> tipsArray = new ArrayList<Tips>();
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            ((MainActivity) getActivity()).setProgressLayout(true);
+        }
+
         protected String doInBackground(String... urls)
         {
             if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.INTERNET)
@@ -206,34 +235,8 @@ public class TipsFragment extends Fragment {
         {
             super.onPostExecute(s);
             populateList(tipsArray);
+            ((MainActivity) getActivity()).setProgressLayout(false);
         }
-    }
-
-    private void populateList(List<Tips> tipsList)
-    {
-        Tips[] tipsArray = tipsList.toArray(new Tips[tipsList.size()]);
-        TipsListAdapter listAdapter = new TipsListAdapter(getActivity(), tipsList.toArray(new Tips[tipsList.size()]));
-        listView.setAdapter(listAdapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
-            {
-                Tips selectedTip = (Tips)listView.getItemAtPosition(position);
-//                WebView webView = new WebView(getActivity());
-                //setContentView(webView);
-//                webView.loadUrl(selectedTip.url);
-                Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(selectedTip.url));
-                startActivity(myIntent);
-        //return webView;
-
-            }
-        });
-    }
-
-    public interface OnFragmentInteractionListener
-    {
-        // TODO: Update argument type and name
-        void onTipsFragmentInteraction(Uri uri);
     }
 }
 
