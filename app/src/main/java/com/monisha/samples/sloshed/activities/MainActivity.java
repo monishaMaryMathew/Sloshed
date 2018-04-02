@@ -408,7 +408,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private class ChartDbWorkAsyncTask extends AsyncTask<Void, Void, Void> {
+    public class ChartDbWorkAsyncTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();

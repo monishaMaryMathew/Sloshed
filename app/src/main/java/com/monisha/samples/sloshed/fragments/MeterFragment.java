@@ -10,10 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -55,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import static android.content.Context.LOCATION_SERVICE;
 import static android.widget.Toast.LENGTH_LONG;
 import static android.widget.Toast.LENGTH_SHORT;
 import static android.widget.Toast.makeText;
@@ -85,6 +81,10 @@ public class MeterFragment extends Fragment {
     List<BlockedContactDB> blockedContacts;
     List<EmergencyContactDB> emergencyContacts;
     boolean isRegistered = false;
+    int blockedDelay = 0;
+    boolean isNetworkEnabled = false;
+    User user;
+    List<UserDB> userList;
     // TODO: Rename and change types of parameters
     private boolean showDialog;
     private int minAfterLastMeal;
@@ -100,10 +100,6 @@ public class MeterFragment extends Fragment {
     private ComponentName component;
     private Switch initiateDrunkModeSwitch;
     private float drinkCount = 0;
-    int blockedDelay = 0;
-    boolean isNetworkEnabled = false;
-    User user;
-    List<UserDB> userList;
 
 
     public MeterFragment() {
@@ -275,6 +271,7 @@ public class MeterFragment extends Fragment {
                 ((MainActivity) getActivity()).previousDrink.setTimestamp(Calendar.getInstance().getTimeInMillis());
                 ((MainActivity) getActivity()).user.addDrink(((MainActivity) getActivity()).previousDrink);
                 setMeter();//update meter
+                ((MainActivity) getActivity()).new ChartDbWorkAsyncTask().execute();
                 makeText(getActivity(), "Drink has been added!", LENGTH_LONG).show();
             }
         });
