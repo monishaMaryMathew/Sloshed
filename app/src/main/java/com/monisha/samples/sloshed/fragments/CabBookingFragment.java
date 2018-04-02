@@ -128,6 +128,15 @@ public class CabBookingFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_cab_booking, container, false);
         lyftButton = (LyftButton) view.findViewById(R.id.lyft_button);
         rideTypeSpinner = (Spinner) view.findViewById(R.id.ride_type_dropdown);
+        SessionConfiguration config = new SessionConfiguration.Builder()
+                .setClientId("ewYMzHD8cEkGMccDoEHJ598rorec_AtC")
+                .setServerToken("oRG6FONYmNq1axBbINoQbb_cCsuMEMe5lcjppMGs")
+                .setRedirectUri("https://com.monisha.samples.sloshed")
+                .setEnvironment(SessionConfiguration.Environment.SANDBOX)
+                .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS))
+                .build();
+        UberSdk.initialize(config);
+
         if (ContextCompat.checkSelfPermission(this.getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -153,7 +162,7 @@ public class CabBookingFragment extends Fragment {
                 // result of the request.
             }
         } else {
-            uberCall();
+            uberCall(config);
             lyftCall();
         }
 
@@ -200,17 +209,9 @@ public class CabBookingFragment extends Fragment {
         void onCabBookingFragmentInteraction();
     }
 
-    private void uberCall() {
+    private void uberCall(SessionConfiguration config) {
 
 
-        SessionConfiguration config = new SessionConfiguration.Builder()
-                .setClientId("ewYMzHD8cEkGMccDoEHJ598rorec_AtC")
-                .setServerToken("oRG6FONYmNq1axBbINoQbb_cCsuMEMe5lcjppMGs")
-                .setRedirectUri("https://com.monisha.samples.sloshed")
-                .setEnvironment(SessionConfiguration.Environment.SANDBOX)
-                .setScopes(Arrays.asList(Scope.PROFILE, Scope.RIDE_WIDGETS))
-                .build();
-        UberSdk.initialize(config);
 
         rideRequest();
         ServerTokenSession session = new ServerTokenSession(config);
