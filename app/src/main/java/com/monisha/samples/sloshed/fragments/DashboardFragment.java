@@ -102,7 +102,7 @@ public class DashboardFragment extends Fragment {
 //        final DbWorkAsyncTask task = new DbWorkAsyncTask();
         list = new ArrayList<BarData>();
         cda = new ChartAdapter(getActivity(), list);
-        cda.setFlag(0, 0); //Weekly view initially
+        cda.setFlag(0); //Weekly view initially
         final GetTask task1 = new GetTask();
         //final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
         final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
@@ -119,6 +119,7 @@ public class DashboardFragment extends Fragment {
 //                    DbWorkAsyncTask task2 = new DbWorkAsyncTask();
 //                    task2.execute().get();
 //                    list = new ArrayList<BarData>();
+                    cda.setFlag(flag);
                     list.clear();
                     list.add(addData());
                     lv.setAdapter(cda);
@@ -174,34 +175,7 @@ public class DashboardFragment extends Fragment {
             {}
             return 7;
         }
-        else //Monthly
-        {
-            int month = Calendar.getInstance().get(Calendar.MONTH);
-            int year = Calendar.getInstance().get(Calendar.YEAR);
-            startDate = new GregorianCalendar(year, month, 1).getTime();
-            int days;
-            switch (month)
-            {
-                case 0: //Jan
-                case 2:
-                case 4:
-                case 6:
-                case 7:
-                case 9:
-                case 11:
-                    days = 31;
-                    break;
-                case 1:
-                    days = 28;
-                    break;
-                default:
-                    days = 30;
-                    break;
-            }
-            endDate = new GregorianCalendar(year, month, days).getTime();
-            cda.setFlag(1, days);
-            return days;
-        }
+        return 0;
     }
 
     private class GetTask extends AsyncTask<Void, Void, Void>
@@ -348,62 +322,105 @@ public class DashboardFragment extends Fragment {
     {
         final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
         GetTask task = new GetTask();
-        int days = setStartEndDate();
-        try
+        int days;
+        if(flag == 1) //monthly
         {
-            task.execute().get();
-        }
-        catch (Exception e)
-        {
-        }
-        Map<String, Integer> dateMap = new HashMap<String, Integer>();
-        Calendar c = Calendar.getInstance();
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        c.setTime(startDate);
-        dateMap.put(df.format(startDate), 0);
-        int ct = 0;
-        while (ct < days)
-        {
-            if (c.getTime().compareTo(endDate) == 1)
-                break;
-            else
+            for (int i = 0; i < 12; i++)
             {
-                c.add(Calendar.DATE, 1);
-                dateMap.put(df.format(c.getTime()), 0);
+                int year = Calendar.getInstance().get(Calendar.YEAR);
+                startDate = new GregorianCalendar(year, i, 1).getTime();
+                switch (i)
+                {
+                    case 0: //Jan
+                    case 2:
+                    case 4:
+                    case 6:
+                    case 7:
+                    case 9:
+                    case 11:
+                        days = 31;
+                        break;
+                    case 1:
+                        days = 28;
+                        break;
+                    default:
+                        days = 30;
+                        break;
+                }
+                endDate = new GregorianCalendar(year, i, days).getTime();
+                try
+                {
+                    task = new GetTask();
+                    task.execute().get();
+                }
+                catch (Exception e)
+                {
+                }
+                int totalDrinkCount = 0;
+                for (int j = 0; j < drinksData.size(); j++)
+                    totalDrinkCount += drinksData.get(j).getDrinkCount();
+                yVals.add(new BarEntry(i, totalDrinkCount));
             }
+//            yVals.add(new BarEntry(13,0));
         }
-        if(dateMap.containsKey(df.format(c.getTime())))
-            dateMap.remove(df.format(c.getTime()));
-        for (DrinkDB drink : drinksData)
+        else
         {
-            if (drink.drinkCount > 0)
-            {
-                //dateMap.remove(drink.timestamp);
-                dateMap.remove(df.format(drink.timestamp));
-                dateMap.put(df.format(drink.timestamp), (int) drink.drinkCount);
-            }
-        }
-        ct = 0;
-        Map<Date, Integer> newDateMap = new TreeMap<>();
-        for (Map.Entry<String, Integer> entry : dateMap.entrySet())
-        {
+            days = setStartEndDate();
             try
             {
-                newDateMap.put(df.parse(entry.getKey()), entry.getValue());
+                task.execute().get();
             }
             catch (Exception e)
             {
             }
+            Map<String, Integer> dateMap = new HashMap<String, Integer>();
+            Calendar c = Calendar.getInstance();
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            c.setTime(startDate);
+            dateMap.put(df.format(startDate), 0);
+            int ct = 0;
+            while (ct < days)
+            {
+                if (c.getTime().compareTo(endDate) == 1)
+                    break;
+                else
+                {
+                    c.add(Calendar.DATE, 1);
+                    dateMap.put(df.format(c.getTime()), 0);
+                }
+            }
+            if (dateMap.containsKey(df.format(c.getTime())))
+                dateMap.remove(df.format(c.getTime()));
+            for (DrinkDB drink : drinksData)
+            {
+                if (drink.drinkCount > 0)
+                {
+                    //dateMap.remove(drink.timestamp);
+                    dateMap.remove(df.format(drink.timestamp));
+                    dateMap.put(df.format(drink.timestamp), (int) drink.drinkCount);
+                }
+            }
+            ct = 0;
+            Map<Date, Integer> newDateMap = new TreeMap<>();
+            for (Map.Entry<String, Integer> entry : dateMap.entrySet())
+            {
+                try
+                {
+                    newDateMap.put(df.parse(entry.getKey()), entry.getValue());
+                }
+                catch (Exception e)
+                {
+                }
+            }
+            Iterator<Map.Entry<Date, Integer>> itr = newDateMap.entrySet().iterator();
+            while (itr.hasNext())
+            {
+                //DrinkDB drink = drinksData.get(i);
+                Map.Entry<Date, Integer> drink = itr.next();
+                yVals.add(new BarEntry(ct, drink.getValue()));
+                ct++;
+            }
         }
-        Iterator<Map.Entry<Date, Integer>> itr = newDateMap.entrySet().iterator();
-        while (itr.hasNext())
-        {
-            //DrinkDB drink = drinksData.get(i);
-            Map.Entry<Date, Integer> drink = itr.next();
-            yVals.add(new BarEntry(ct, drink.getValue()));
-            ct++;
-        }
-
 
         BarDataSet dataSet = new BarDataSet(yVals, "Drinks count");
         dataSet.setColors(ColorTemplate.COLORFUL_COLORS);

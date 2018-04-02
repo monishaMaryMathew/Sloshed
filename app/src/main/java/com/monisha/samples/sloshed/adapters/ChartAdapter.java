@@ -16,6 +16,7 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IValueFormatter;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.github.mikephil.charting.utils.Utils;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.monisha.samples.sloshed.R;
@@ -29,16 +30,15 @@ import java.util.List;
 
 public class ChartAdapter extends ArrayAdapter<BarData>
 {
-    int flag = 0, days;
+    int flag = 0;
     public ChartAdapter(Context context, List<BarData> objects)
     {
         super(context, 0, objects);
     }
 
-    public void setFlag(int val, int count)
+    public void setFlag(int val)
     {
         flag = val;
-        days = count;
     }
 
     @Override
@@ -81,26 +81,52 @@ public class ChartAdapter extends ArrayAdapter<BarData>
         }
         else
         {
-            for (int i = 0; i <days; i++)
-            {
-                labels.add(Integer.toString(i+1));
-            }
-            xAxis.setLabelCount(days, true);
+            labels.add("Jan");
+            labels.add("Feb");
+            labels.add("Mar");
+            labels.add("Apr");
+            labels.add("May");
+            labels.add("Jun");
+            labels.add("Jul");
+            labels.add("Aug");
+            labels.add("Sep");
+            labels.add("Oct");
+            labels.add("Nov");
+            labels.add("Dec");
+//            labels.add(" ");
             xAxis.setTextSize(10f);
-//            holder.chart.setVisibleXRangeMaximum(20);
-//            holder.chart.moveViewToX(10);
         }
-        if(flag == 0)
+//        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+        if(flag == 1)
+            xAxis.setLabelCount(12, true);
+
+        xAxis.setValueFormatter(new IAxisValueFormatter()
         {
-            xAxis.setValueFormatter(new IAxisValueFormatter()
+            int ct = 0;
+            @Override
+            public String getFormattedValue(float value, AxisBase axis)
             {
-                @Override
-                public String getFormattedValue(float value, AxisBase axis)
+//                if(flag == 1 && ct < 12)
+//                {
+//                    value = ct;
+//                    ct++;
+////                    return labels.get(ct++);
+//                }
+//                else
+                if(flag == 1)
                 {
-                    return labels.get((int) value);
+                    if (ct < 12)
+                        return labels.get(ct++);//(int) value);
+                    else
+                    {
+                        ct = 0;
+                        return labels.get(ct++);
+                    }
                 }
-            });
-        }
+                else
+                    return labels.get((int) value);
+            }
+        });
         xAxis.setTextColor(Color.WHITE);
         data.setValueFormatter(new IValueFormatter()
         {
