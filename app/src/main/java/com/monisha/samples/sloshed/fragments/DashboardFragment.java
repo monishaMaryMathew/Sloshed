@@ -99,15 +99,12 @@ public class DashboardFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_dashboard, container, false);
         final Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
         final ListView lv = (ListView) view.findViewById(R.id.listView);
-//        final DbWorkAsyncTask task = new DbWorkAsyncTask();
         list = new ArrayList<BarData>();
         cda = new ChartAdapter(getActivity(), list);
         cda.setFlag(0); //Weekly view initially
         final GetTask task1 = new GetTask();
-        //final BarChart barChart = (BarChart) view.findViewById(R.id.chart);
         final ArrayList<BarEntry> yVals = new ArrayList<BarEntry>();
         setStartEndDate();
-        // Spinner click listener
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -116,18 +113,13 @@ public class DashboardFragment extends Fragment {
                 flag = (String) spinner.getSelectedItem() != "Weekly View" ? 1:0;
                 try
                 {
-//                    DbWorkAsyncTask task2 = new DbWorkAsyncTask();
-//                    task2.execute().get();
-//                    list = new ArrayList<BarData>();
-                    cda.setFlag(flag);
+                    cda.setFlag(flag); //For the chartAdapter to know what labels to load
                     list.clear();
                     list.add(addData());
                     lv.setAdapter(cda);
                 }
                 catch (Exception e)
-                {
-
-                }
+                {}
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent)
@@ -139,13 +131,10 @@ public class DashboardFragment extends Fragment {
         List<String> categories = new ArrayList<String>();
         categories.add("Weekly View");
         categories.add("Monthly View");
-
         // Creating adapter for spinner
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, categories);
-
         // Drop down layout style - list view with radio button
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
         // attaching data adapter to spinner
         spinner.setAdapter(dataAdapter);
         // Inflate the layout for this
@@ -155,27 +144,23 @@ public class DashboardFragment extends Fragment {
 
     private int setStartEndDate()
     {
-        if(flag == 0)
+        Calendar c = Calendar.getInstance();
+        while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY)
+            c.add(Calendar.DATE, -1);
+        startDate = c.getTime();
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        c = Calendar.getInstance();
+        while (c.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
+            c.add(Calendar.DATE, 1);
+        endDate = c.getTime();
+        try //this is to make the start time 12AM
         {
-            Calendar c = Calendar.getInstance();
-            while (c.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY)
-                c.add(Calendar.DATE, -1);
-            startDate = c.getTime();
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-            c = Calendar.getInstance();
-            while (c.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY)
-                c.add(Calendar.DATE, 1);
-            endDate = c.getTime();
-            try //this is to make the start time 12AM
-            {
-                startDate = df.parse(df.format(startDate));
-                endDate = df.parse(df.format(endDate));
-            }
-            catch (Exception e)
-            {}
-            return 7;
+            startDate = df.parse(df.format(startDate));
+            endDate = df.parse(df.format(endDate));
         }
-        return 0;
+        catch (Exception e)
+        {}
+        return 7;
     }
 
     private class GetTask extends AsyncTask<Void, Void, Void>
@@ -186,7 +171,6 @@ public class DashboardFragment extends Fragment {
             //There is no need to use getAll() need to get details exactly for a month or a week. Use
             //getAll() if needed later.
             drinksData = db.drinkDAO().getForStartEnd(startDate, endDate);
-            Log.d("doinbackground","size:" + drinksData.size());
             return null;
         }
     }
@@ -198,104 +182,6 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-//    private class DbWorkAsyncTask extends AsyncTask<Void, Void, Void>
-//    {
-//        Date now = new Date();
-//        Date now1 = new Date(118,2,25,22,21);
-//        Date now2 = new Date(118,2,28,22,23);
-//        Date now3 = new Date(118,2,3,22,24);
-//        Date future = new Date(118,3,1,22,20);
-//        @Override
-//        protected Void doInBackground(Void... voids) {
-//            initializeDB();
-//            deleteAll();
-//            //testInsertUpdate();
-//            insertToDB();
-//            getAndDisplayAll();
-//            return null;
-//        }
-//
-//        private void testInsertUpdate() {
-//            DrinkDB drinks = new DrinkDB(5,now,3, now,future,0);
-//            updateOrInsert(drinks); //needs to insert, since it is the first time
-//            getAndDisplayAll();
-//
-//            drinks.setDrinkCount(2);
-//            updateOrInsert(drinks); //needs to update, since it is a new number
-//            getAndDisplayAll();
-//
-//            drinks.setBac(0.04f);
-//            updateOrInsert(drinks); //needs to insert, since it is new drinks
-//            getAndDisplayAll();
-//        }
-//
-//        private void initializeDB(){
-//            db = Room.databaseBuilder(getContext(),
-//                    AppDatabase.class, "DrinkDB")
-//                    .fallbackToDestructiveMigration()
-//                    .build();
-//        }
-//
-//        private void insertToDB(){
-//            DrinkDB bc1 = new DrinkDB(11,now,3, now,future,0);
-//            DrinkDB bc2 = new DrinkDB(22,now1,2, now1,future,0);
-//            DrinkDB bc3 = new DrinkDB(33,now2,0, now2,future,0);
-//            DrinkDB bc4 = new DrinkDB(44,now3,1, now3,future,0);
-//            db.drinkDAO().insertAll(bc1, bc2, bc3, bc4);
-//        }
-//
-//        private void readFromDB(){
-//            /*List<DrinkDB> bcs = db.blockedContactDAO().getAll();
-//            */
-//            List<DrinkDB> bcs = db.drinkDAO().getForStartEnd(now, future);
-//            if((bcs==null)||(bcs!=null && bcs.size()==0)){
-//                Log.d("TAG", "ouch");
-//            }
-//            for(DrinkDB bc: bcs){
-//                Log.d("TAG", "timestamp:"+bc.timestamp.toString() + "count:" + bc.drinkCount + "timestart:" + bc.start_time + "end:" + bc.end_time + "bac:" + bc.bac);
-//            }
-//        }
-//
-//        private void deleteAll(){
-//            List<DrinkDB> list = getAndDisplayAll();
-//            for (DrinkDB b : list){
-//                db.drinkDAO().delete(b);
-//            }
-//            Log.d("TAG", "deleted all");
-//            List<DrinkDB> list1 = getAndDisplayAll();
-//        }
-//
-//        private List<DrinkDB> getAndDisplayAll() {
-//            List<DrinkDB> list = db.drinkDAO().getAll();
-//            display(list);
-//            return list;
-//        }
-//
-//        private void updateOrInsert(DrinkDB contact){
-//            DrinkDB contactToBeAdded = contact;
-//            List<DrinkDB> contacts = db.drinkDAO().getForThisSession(contactToBeAdded.timestamp);
-//            if((contacts==null)||(contacts!=null && contacts.size()==0)){
-//                //No such contact already exists in the database
-//                db.drinkDAO().insertAll(contactToBeAdded);
-//                Log.d("TAG", "Inserted contact");
-//            } else {
-//                //This contact already exists in the database
-//                DrinkDB contactToBeUpdated = contacts.get(0);
-//                contactToBeUpdated.setDrinkCount(contactToBeAdded.drinkCount);
-//                db.drinkDAO().update(contactToBeUpdated);
-//                Log.d("TAG", "Updated contact");
-//            }
-//        }
-//
-//        private void display(List<DrinkDB> cs){
-//            if((cs==null)||(cs!=null && cs.size()==0)){
-//                Log.d("TAG", "ouch");
-//            }
-//            for(DrinkDB bc: cs){
-//                Log.d("TAG", "timestamp:"+bc.timestamp.toString() + "count:" + bc.drinkCount + "timestart:" + bc.start_time + "end:" + bc.end_time + "bac:" + bc.bac);
-//            }
-//        }
-//    }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -361,7 +247,6 @@ public class DashboardFragment extends Fragment {
                     totalDrinkCount += drinksData.get(j).getDrinkCount();
                 yVals.add(new BarEntry(i, totalDrinkCount));
             }
-//            yVals.add(new BarEntry(13,0));
         }
         else
         {

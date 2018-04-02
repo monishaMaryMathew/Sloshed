@@ -58,15 +58,10 @@ public class ChartAdapter extends ArrayAdapter<BarData>
             holder = (ViewHolder) convertView.getTag();
         }
         Utils.init(getContext());
-        // apply styling
-        //data.setValueTypeface(mTfLight);
-//        data.setValueTextColor(Color.BLACK);
         holder.chart.getDescription().setEnabled(false);
         holder.chart.setDrawGridBackground(false);
-
         XAxis xAxis = holder.chart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        //xAxis.setTypeface(mTfLight);
         xAxis.setDrawGridLines(false);
         final ArrayList<String> labels = new ArrayList<String>();
         if(flag == 0)
@@ -93,10 +88,8 @@ public class ChartAdapter extends ArrayAdapter<BarData>
             labels.add("Oct");
             labels.add("Nov");
             labels.add("Dec");
-//            labels.add(" ");
             xAxis.setTextSize(10f);
         }
-//        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
         if(flag == 1)
             xAxis.setLabelCount(12, true);
 
@@ -106,13 +99,6 @@ public class ChartAdapter extends ArrayAdapter<BarData>
             @Override
             public String getFormattedValue(float value, AxisBase axis)
             {
-//                if(flag == 1 && ct < 12)
-//                {
-//                    value = ct;
-//                    ct++;
-////                    return labels.get(ct++);
-//                }
-//                else
                 if(flag == 1)
                 {
                     if (ct < 12)
@@ -140,38 +126,23 @@ public class ChartAdapter extends ArrayAdapter<BarData>
             }
         });
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        YAxis leftAxis = holder.chart.getAxisLeft();
-        //leftAxis.setTypeface(mTfLight);
-//        leftAxis.setLabelCount(5, false);
-//        leftAxis.setSpaceTop(15f);
-
         YAxis rightAxis = holder.chart.getAxisRight();
-        //rightAxis.setTypeface(mTfLight);
-//        rightAxis.setLabelCount(5, false);
-//        rightAxis.setSpaceTop(15f);
         rightAxis.setDrawGridLines(false);
         // set data
         holder.chart.setFitBars(true);
         rightAxis.removeAllLimitLines();
         rightAxis.setDrawLabels(false);
-
-        // do not forget to refresh the chart
-//            holder.chart.invalidate();
         holder.chart.animateY(700);
         holder.chart.getDescription().setEnabled(false);
         holder.chart.setPinchZoom(false);
         YAxis left = holder.chart.getAxisLeft();
         left.setDrawLabels(false);
-//        left.setSpaceTop(25f);
-//        left.setSpaceBottom(25f);
         left.setDrawAxisLine(false);
         left.setDrawGridLines(false);
         left.setDrawZeroLine(false); // draw a zero line
         left.setZeroLineColor(Color.GRAY);
-//        left.setZeroLineWidth(0.7f);
         holder.chart.getLegend().setEnabled(false);
         data.setValueTextColor(Color.WHITE);
-
         holder.chart.setData(data);
         return convertView;
     }
