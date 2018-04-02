@@ -257,7 +257,9 @@ public class CabBookingFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        googleApiClient.disconnect();
+        if(googleApiClient!=null) {
+            googleApiClient.disconnect();
+        }
         for (Call call : callSet) {
             call.cancel();
         }

@@ -12,23 +12,14 @@
     android:layout_height="fill_parent">
 
 
-    <TextView
-        android:id="@+id/mytextview"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Get home in a cab"
-        android:textStyle="bold"
-        android:layout_gravity="center"
-        android:textColor="@color/black"
-        android:textSize="24dp"
-        />
 
     <com.uber.sdk.android.rides.RideRequestButton
         android:layout_width="350dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         uber:ub__style="black"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center"
+        android:background="@drawable/rounded"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
