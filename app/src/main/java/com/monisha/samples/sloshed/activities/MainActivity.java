@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.arch.persistence.room.Room;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -38,10 +37,14 @@ import com.monisha.samples.sloshed.models.User;
 import com.monisha.samples.sloshed.util.AppDatabase;
 import com.monisha.samples.sloshed.util.StageEnum;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
+import java.util.TreeMap;
 
 //import com.monisha.samples.sloshed.fragments.SettingsFragment;
 
@@ -56,11 +59,13 @@ public class MainActivity extends AppCompatActivity implements
         DrinkSelectionFragment.OnFragmentInteractionListener
 
 {
-    public Drink previousDrink = null;
-    public boolean bSession = false;
+   /* public boolean bSession = false;
     private Date startTime ;
-    private int nSession;
+    private int nSession;*/
+
+    public Drink previousDrink = null;
     public User user = new User();
+    private DrinkDB drinkDBObj = null;
     private FragmentManager fragmentManager = getFragmentManager();
     private FragmentTransaction fragmentTransaction;
     private StageEnum checkRateStage = StageEnum.START_MY_NIGHT;
@@ -227,7 +232,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onDrinkFragmentInteraction(int buttonCase, Drink drink)
     {
-        ChartDbWorkAsyncTask task = new ChartDbWorkAsyncTask();
         switch (buttonCase) {
             case 0:
                 //Back/Cancel button
@@ -238,11 +242,9 @@ public class MainActivity extends AppCompatActivity implements
                 //Add button
                 //check if there is a valid selection
                 if (drink != null && drink.getAlcoholPercentage() != 0 && drink.getQuantity() != 0) {
-                    drink.getDrinkCount();//defult check
-                    previousDrink = drink;
-                    task.setCount(drink.getDrinkCount());
-                    task.execute();
-                    user.addDrink(previousDrink);//if it is a correct selection
+                    previousDrink = drink; //update previous drink
+                    user.addDrink(previousDrink);//add it to the list in the user object
+                    (new ChartDbWorkAsyncTask()).execute();
                     setCheckRateStage(StageEnum.METER);
                     setCheckRateFragment();
                 } else {
@@ -350,8 +352,8 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(aVoid);
             if (blockedDBList != null && blockedDBList.size() > 0) {
                 user.setBlockedContacts(blockedDBList);
-                (new LoadEmergencyDBTask()).execute();
             }
+            (new LoadEmergencyDBTask()).execute();
             setProgressLayout(false);
         }
 
@@ -385,10 +387,8 @@ public class MainActivity extends AppCompatActivity implements
             super.onPostExecute(aVoid);
             if (emergencyDBList != null && emergencyDBList.size() > 0) {
                 user.setEmergencyContacts(emergencyDBList);
-                if (user.getWeight() == 0) {
-                    createDialog();
-                }
             }
+            (new LoadDrinkDBTask()).execute();
             setProgressLayout(false);
         }
 
@@ -408,7 +408,40 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private class ChartDbWorkAsyncTask extends AsyncTask<Void, Void, Void>
+    private class ChartDbWorkAsyncTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setProgressLayout(true);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            setProgressLayout(false);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            initializeDB();
+            updateDrinkDB();
+            return null;
+        }
+
+        private void initializeDB() {
+            db = AppDatabase.getAppDatabase(MainActivity.this);
+        }
+
+        private void updateDrinkDB() {
+            Date now = new Date();
+            drinkDBObj.setEnd_time(now);
+            float count = drinkDBObj.getDrinkCount();
+            drinkDBObj.setDrinkCount(count + previousDrink.getDrinkCount());
+            db.drinkDAO().update(drinkDBObj);
+        }
+    }
+
+    /*private class ChartDbWorkAsyncTask1 extends AsyncTask<Void, Void, Void>
     {
         private float drinkCount;
 
@@ -495,6 +528,105 @@ public class MainActivity extends AppCompatActivity implements
             }
             Log.d("TAG", "deleted all");
             List<DrinkDB> list1 = getAndDisplayAll();
+        }
+    }*/
+
+    class LoadDrinkDBTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setProgressLayout(true);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (user.getWeight() == 0) {
+                createDialog();
+            }
+            setProgressLayout(false);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            initializeDB();
+            loadFromDrinkDB();
+            return null;
+        }
+
+        private void initializeDB() {
+            db = AppDatabase.getAppDatabase(MainActivity.this);
+        }
+
+        private void loadFromDrinkDB() {
+            List<DrinkDB> entries = db.drinkDAO().getAll();
+            TreeMap<Date, DrinkDB> dateTreeMap = new TreeMap(new Comparator<Map.Entry<Date, DrinkDB>>() {
+                @Override
+                public int compare(Map.Entry<Date, DrinkDB> t1, Map.Entry<Date, DrinkDB> t2) {
+                    Date t1_date = t1.getKey();
+                    Date t2_date = t2.getKey();
+                    //Ascending order
+                    //latest entry last
+                    if (t1_date.after(t2_date)) {
+                        return 1;
+                    } else if (t1_date.before(t2_date)) {
+                        return -1;
+                    } else if (t1_date.equals(t2_date)) {
+                        return 0;
+                    }
+                    return 0;
+                }
+            });
+            for (DrinkDB entry : entries) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date d = sdf.parse(entry.getStart_time().toString());
+                    dateTreeMap.put(d, entry);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }//end of for
+            //get the latest entry
+            if (dateTreeMap.size() > 0) {
+                DrinkDB latestEntry = (DrinkDB) dateTreeMap.lastEntry();
+                try {
+                    int latestSession = latestEntry.getSession();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    Date latestDate = latestEntry.getStart_time();
+                    String formattedLatestDate = sdf.format(latestDate);
+                    Date today = new Date();
+                    String formattedToday = sdf.format(today);
+                    if (formattedLatestDate.equals(formattedToday)) {
+                        //same day
+                        drinkDBObj = latestEntry;
+                        user.setCurrentDrinkCount(drinkDBObj.getDrinkCount());
+                    } else {
+                        //new day
+                        createNewDrinkDB(latestSession + 1);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            } else {
+                //No entries in DB
+                createNewDrinkDB(1); //first session
+            }
+        }
+
+        private void createNewDrinkDB(int session) {
+//            public DrinkDB(@NonNull int session, @NonNull Date timestamp, float drinkCount, Date start_time, Date end_time, float bac)
+            float drinkCount = 0;
+            float bac = 0;
+            Date now = new Date();
+            drinkDBObj = new DrinkDB(session,
+                    now, //timestamp
+                    drinkCount,
+                    now, //start_time
+                    now, //end_time
+                    bac);
+            db.drinkDAO().insertAll(drinkDBObj);
         }
     }
 }
