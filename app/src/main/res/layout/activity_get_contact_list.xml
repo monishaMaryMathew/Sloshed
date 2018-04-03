@@ -24,7 +24,7 @@
         android:layout_height="54dp"
         android:layout_margin="3dp"
         android:layout_weight="1"
-        android:background="@color/colorGrey"
+        android:background="@drawable/grey_btn_bg"
         android:text="Cancel" />
 
     <Button
@@ -33,7 +33,7 @@
         android:layout_height="54dp"
         android:layout_margin="3dp"
         android:layout_weight="1"
-        android:background="@color/colorAccent"
+        android:background="@drawable/gradient_bg_red_purple"
         android:text="Submit" />
     </LinearLayout>
 
