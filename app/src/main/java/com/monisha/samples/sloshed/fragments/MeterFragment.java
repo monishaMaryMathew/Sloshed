@@ -2,11 +2,13 @@ package com.monisha.samples.sloshed.fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -41,6 +43,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.monisha.samples.sloshed.R;
 import com.monisha.samples.sloshed.activities.MainActivity;
+import com.monisha.samples.sloshed.activities.SettingsActivity;
 import com.monisha.samples.sloshed.dbmodels.BlockedContactDB;
 import com.monisha.samples.sloshed.dbmodels.EmergencyContactDB;
 import com.monisha.samples.sloshed.dbmodels.UserDB;
@@ -242,7 +245,7 @@ public class MeterFragment extends Fragment {
             sosLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getPlaces();
+                    createDialog();
 
                 }
             });
@@ -392,6 +395,7 @@ public class MeterFragment extends Fragment {
                         // getContext().getPackageManager().setComponentEnabledSetting(component, PackageManager.COMPONENT_ENABLED_STATE_ENABLED , PackageManager.DONT_KILL_APP);
                         isRegistered = true;
                         makeText(getContext(), "You will not be able to call the contacts you have blocked", LENGTH_LONG).show();
+
                         Handler mHandler = new Handler();
                         mHandler.postDelayed(new Runnable() {
 
@@ -438,6 +442,21 @@ public class MeterFragment extends Fragment {
         if (mListener != null) {
             mListener.onMeterFragmentInteraction();
         }
+    }
+
+    private void createDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setMessage("The emergency contacts will receive details about your whereabouts, stating that you need help.")
+                .setTitle("Sending SOS")
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        getPlaces();
+                    }
+                })
+                .setCancelable(true);
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override
