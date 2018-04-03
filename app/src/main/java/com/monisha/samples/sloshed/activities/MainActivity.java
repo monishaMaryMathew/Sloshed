@@ -280,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements
                         startActivity(intent);
                     }
                 })
-                .setCancelable(true);
+                .setCancelable(false);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
