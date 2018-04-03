@@ -51,6 +51,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
                             android:text="Beer"
+                            android:textColor="@color/white"
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
@@ -82,6 +83,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="5%"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -97,6 +99,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="7%"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -122,6 +125,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="12 fl Oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -137,6 +141,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="16 fl oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -152,6 +157,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="22 fl oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -167,6 +173,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="40 fl oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -191,6 +198,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
                             android:text="Wine"
+                            android:textColor="@color/white"
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </RelativeLayout>
@@ -221,6 +229,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="12%"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -246,6 +255,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="5 fl oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -261,6 +271,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="25.36 fl oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -285,6 +296,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
                             android:text="Spirits and Cocktails"
+                            android:textColor="@color/white"
                             android:textSize="20sp"
                             android:textStyle="bold" />
                     </RelativeLayout>
@@ -315,6 +327,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="40%"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -339,6 +352,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="1.5 fl Oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -354,6 +368,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="6.76 fl oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -369,6 +384,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="12.68 fl oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>
@@ -384,6 +400,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_centerInParent="true"
                                     android:text="25.36 fl oz"
+                                    android:textColor="@color/black"
                                     android:textSize="14sp"
                                     android:textStyle="bold" />
                             </RelativeLayout>

@@ -40,10 +40,8 @@ import com.monisha.samples.sloshed.util.StageEnum;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 
 //import com.monisha.samples.sloshed.fragments.SettingsFragment;
@@ -188,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onMealFragmentInteractionNextBtnPressed(int minAfterLastMeal) {
         this.minAfterLastMeal = minAfterLastMeal;
+        createNewDrinkDB();
         setCheckRateStage(StageEnum.METER_WITH_DRINK);
         setCheckRateFragment();
     }
@@ -289,6 +288,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onTipsFragmentInteraction(Uri uri) {
 
+    }
+
+    public void createNewDrinkDB() {
+        (new CreateNewDrinkDBTask()).execute();
     }
 
     class LoadUserDBTask extends AsyncTask<Void, Void, Void> {
@@ -474,24 +477,9 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         private void loadFromDrinkDB() {
+            drinkDBObj = new DrinkDB(0, new Date(), 0, null, null, 0); //dummy object creation
             List<DrinkDB> entries = db.drinkDAO().getAll();
-            TreeMap<Date, DrinkDB> dateTreeMap = new TreeMap(new Comparator<Map.Entry<Date, DrinkDB>>() {
-                @Override
-                public int compare(Map.Entry<Date, DrinkDB> t1, Map.Entry<Date, DrinkDB> t2) {
-                    Date t1_date = t1.getKey();
-                    Date t2_date = t2.getKey();
-                    //Ascending order
-                    //latest entry last
-                    if (t1_date.after(t2_date)) {
-                        return 1;
-                    } else if (t1_date.before(t2_date)) {
-                        return -1;
-                    } else if (t1_date.equals(t2_date)) {
-                        return 0;
-                    }
-                    return 0;
-                }
-            });
+            TreeMap<Date, DrinkDB> dateTreeMap = new TreeMap();
             for (DrinkDB entry : entries) {
                 try {
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -519,7 +507,7 @@ public class MainActivity extends AppCompatActivity implements
                         isContinuation = true;
                     } else {
                         //new day
-                        createNewDrinkDB(latestSession + 1);
+                        drinkDBObj.setSession(latestSession + 1); //next session
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -527,22 +515,39 @@ public class MainActivity extends AppCompatActivity implements
 
             } else {
                 //No entries in DB
-                createNewDrinkDB(1); //first session
+                drinkDBObj.setSession(1); //first session
             }
         }
+    }
 
-        private void createNewDrinkDB(int session) {
-//            public DrinkDB(@NonNull int session, @NonNull Date timestamp, float drinkCount, Date start_time, Date end_time, float bac)
+    class CreateNewDrinkDBTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            db = AppDatabase.getAppDatabase(MainActivity.this);
             float drinkCount = 0;
             float bac = 0;
             Date now = new Date();
-            drinkDBObj = new DrinkDB(session,
+            drinkDBObj = new DrinkDB(drinkDBObj.getSession(),
                     now, //timestamp
                     drinkCount,
                     now, //start_time
                     now, //end_time
                     bac);
             db.drinkDAO().insertAll(drinkDBObj);
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setProgressLayout(true);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            setProgressLayout(false);
         }
     }
 }
