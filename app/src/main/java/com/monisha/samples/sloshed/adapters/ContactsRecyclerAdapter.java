@@ -22,10 +22,12 @@ public class ContactsRecyclerAdapter extends RecyclerView.Adapter<ContactsRecycl
 
     private List<Contact> values;
     private List<Contact> checkedList = new ArrayList<>();
+    private List<Contact> itemsCopy= new ArrayList<>();
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public ContactsRecyclerAdapter(List<Contact> myDataset) {
         values = myDataset;
+        itemsCopy.addAll(myDataset);
     }
 
     public void add(int position, Contact item) {
@@ -36,6 +38,22 @@ public class ContactsRecyclerAdapter extends RecyclerView.Adapter<ContactsRecycl
     public void remove(int position) {
         values.remove(position);
         notifyItemRemoved(position);
+    }
+
+
+    public void filter(String text) {
+        values.clear();
+        if(text.isEmpty()){
+            values.addAll(itemsCopy);
+        } else{
+            text = text.toLowerCase();
+            for(Contact item: itemsCopy){
+                if(item.getName().toLowerCase().contains(text) || item.getPhoneNumber().toLowerCase().contains(text)){
+                    values.add(item);
+                }
+            }
+        }
+       this.notifyDataSetChanged();
     }
 
     // Create new views (invoked by the layout manager)
